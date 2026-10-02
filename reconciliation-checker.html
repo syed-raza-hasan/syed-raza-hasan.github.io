@@ -295,7 +295,7 @@
     notes.push(L.footA && L.footB ? "Both totals agree to the line detail." : "Totals do not re-add from the lines. Check the amount columns.");
     if (L.blankA || L.blankB) notes.push((L.blankA + L.blankB) + " rows had no key and were skipped.");
     if (L.badA || L.badB) notes.push((L.badA + L.badB) + " rows had an unreadable amount.");
-    if (S.var[3] < 0) notes.push("File A is lower than File B on some lines, by " + money(S.var[3]) + " in total.");
+    if (S.var[3] < 0) notes.push("File A is lower than File B on some lines, by " + money(Math.abs(S.var[3])) + " in total.");
     document.getElementById("foot-note").textContent = notes.join(" ");
 
     if (mixChart) { V.update(mixChart); } else mixChart = V.register(document.getElementById("c-mix"), () => {
