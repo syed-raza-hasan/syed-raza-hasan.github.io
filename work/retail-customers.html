@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Concentration and Retention | Syed Raza Hasan</title>
+<meta name="description" content="Sales, cohort retention, RFM segments and product mix for a UK online gift wholesaler, built on 1M+ invoice lines.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css?v=12">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+</head>
+<body data-source="UCI Machine Learning Repository, Online Retail II. Analysis by Syed Raza Hasan.">
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html">Syed Raza Hasan<small>Finance and operations analytics</small></a>
+    <nav class="nav">
+      <a class="hide-sm" href="../index.html#capabilities">Capabilities</a>
+      <a class="hide-sm" href="../index.html#engagements">Engagements</a>
+      <a href="../index.html#insights">Insights</a>
+      <a href="../index.html#contact">Contact</a>
+      <button class="theme-btn" type="button" aria-label="Toggle theme"></button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="dash-head">
+    <div class="crumbs"><a href="../index.html#insights">&larr; Insights</a></div>
+    <p class="kicker">Insight &middot; Commercial</p>
+    <h1>A quarter of a wholesaler's customers generate 70% of its revenue</h1>
+    <p class="lede">Two years of invoices, December 2009 to November 2011, from a UK online wholesaler that sells mainly to small retailers: where revenue comes from, which customers have lapsed, and which products carry the range.</p>
+    <div class="meta-row"><span><b>Source</b> UCI Online Retail II (public)</span><span><b>Coverage</b> 1.07M invoice lines</span><span><b>Method</b> Python, pandas</span></div>
+  </div>
+
+  <div class="findings">
+    <h2>Key findings</h2>
+    <ol>
+      <li><b>1,445 customers, a quarter of those identified, generated 70% of revenue.</b> The median one had placed 10 orders and last ordered 15 days before the cut-off.</li>
+      <li><b>841 previously regular customers had not ordered in about a year.</b> Their past spend totals &pound;1.5M, which makes them the first list for a win-back programme.</li>
+      <li><b>September to November 2011 produced 38% of the year's sales.</b> Stock and staffing plans for the peak need to start by mid-year.</li>
+      <li><b>1,050 of 4,893 products, 21% of the range, produced 80% of sales.</b></li>
+    </ol>
+  </div>
+
+  <div class="brief">
+    <div class="brief-who">
+      <h3>Context</h3>
+      <dl>
+        <dt>Who uses it</dt><dd>The owner and sales lead of a small wholesaler</dd>
+        <dt>How often</dt><dd>Monthly, before the sales team plans its calls</dd>
+        <dt>Key question</dt><dd>Which customers should we call this month, and which products must never run out?</dd>
+        <dt>Decision it supports</dt><dd>The monthly call list and pre-season stock orders</dd>
+        <dt>Existing report?</dt><dd>Most wholesalers have monthly sales totals. Customer segments and cohorts are new.</dd>
+      </dl>
+    </div>
+    <ol class="chain">
+      <li><span>Metric</span><p>Revenue by customer segment, cohort repeat rate, and revenue concentration by product.</p></li>
+      <li><span>Problem</span><p>70% of revenue sits with a quarter of named customers, and 841 customers who used to order regularly have gone quiet.</p></li>
+      <li><span>Hypothesis</span><p>Growth comes from existing customers buying more, so retention is the lever.<br><span class="verdict yes">Result: supported</span></p></li>
+      <li><span>Analysis</span><p>1M invoice lines turned into cohorts and recency and frequency segments. <b>In November 2011 returning customers brought in £1.06M and new customers £80K.</b> 1,050 of 4,893 products make 80% of sales.</p></li>
+      <li><span>Experiment</span><p>Call half of the at-risk list with a reorder offer, leave the other half alone, and compare reorder rates after 60 days.</p></li>
+      <li><span>Decision</span><p><b>Run a monthly win-back list from the at-risk segment</b>, and lock stock for the top 1,050 products before September.</p></li>
+    </ol>
+  </div>
+
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="panel" id="p-month" style="margin-bottom:16px">
+    <div class="panel-head">
+      <div><h3 id="month-title">Monthly sales by customer type</h3><p id="month-sub">Gross sales before returns, GBP</p></div>
+      <div class="panel-tools">
+        <div class="seg" id="month-metric" role="group" aria-label="Metric">
+          <button type="button" data-m="sales" aria-pressed="true">Sales</button>
+          <button type="button" data-m="orders" aria-pressed="false">Orders</button>
+          <button type="button" data-m="aov" aria-pressed="false">Avg order</button>
+        </div>
+        <button class="tbl-btn" data-panel="p-month" aria-pressed="false">Table</button>
+      </div>
+    </div>
+    <div id="lg-month"></div>
+    <div class="chart" id="c-month"></div>
+    <div class="table-view" id="t-month"></div>
+  </div>
+
+  <div class="dash-grid wide-left">
+    <div class="panel" id="p-cohort">
+      <div class="panel-head">
+        <div><h3>Repeat purchase rate by monthly cohort</h3><p>Share of each monthly cohort that ordered again N months after their first order</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-cohort" aria-pressed="false">Table</button></div>
+      </div>
+      <div class="chart tall" id="c-cohort"></div>
+      <div class="table-view" id="t-cohort"></div>
+    </div>
+    <div class="panel" id="p-rfm">
+      <div class="panel-head">
+        <div><h3>Customer segments</h3><p>Recency and frequency scores as of 1 Dec 2011</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-rfm" aria-pressed="false">Table</button></div>
+      </div>
+      <div id="lg-rfm"></div>
+      <div class="chart tall" id="c-rfm"></div>
+      <div class="table-view" id="t-rfm"></div>
+    </div>
+  </div>
+
+  <div class="dash-grid two">
+    <div class="panel" id="p-pareto">
+      <div class="panel-head">
+        <div><h3>Revenue concentration by product</h3><p>Cumulative share of revenue, products ranked by revenue</p></div>
+      </div>
+      <div class="chart" id="c-pareto"></div>
+    </div>
+    <div class="panel" id="p-heat">
+      <div class="panel-head">
+        <div><h3>Invoices by weekday and hour</h3><p>Invoices by weekday and hour, UK time</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-heat" aria-pressed="false">Table</button></div>
+      </div>
+      <div class="chart" id="c-heat"></div>
+      <div class="table-view" id="t-heat"></div>
+    </div>
+  </div>
+
+  <div class="dash-grid wide-left">
+    <div class="panel" id="p-prod">
+      <div class="panel-head"><div><h3>Top 12 products</h3><p>By gross revenue. Return rate is returned value over sold value.</p></div></div>
+      <div id="t-prod" style="overflow:auto"></div>
+    </div>
+    <div class="panel" id="p-ctry">
+      <div class="panel-head">
+        <div><h3>Gross sales by customer country</h3><p>Gross sales by customer country</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-ctry" aria-pressed="false">Table</button></div>
+      </div>
+      <div class="chart" id="c-ctry"></div>
+      <div class="table-view" id="t-ctry"></div>
+    </div>
+  </div>
+
+  <div class="method">
+    <h3>Methodology</h3>
+    <p>The raw file has 1.07M invoice lines across two Excel sheets with about 34K exact duplicates, which I dropped. I took out postage, bank charges, manual adjustments and other non-product codes, and lines with a zero price. One 74,215-unit storage jar order was cancelled 16 minutes after it was placed, so I removed both halves of it. Invoice numbers starting with C are cancellations and count as returns. December 2011 stops on the 9th, so the trend ends in November. Cohort and segment views only use the 77% of lines that carry a customer ID.</p>
+    <p>Segments use quintile scores for recency (days since last order) and frequency (number of invoices). Champions score 4 or 5 on both. At risk means 3+ on frequency but 1 or 2 on recency.</p>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap"><span>&copy; Syed Raza Hasan</span><span><a href="../index.html#contact">razahasan8993@gmail.com</a></span></div></footer>
+
+<script src="../assets/echarts.min.js?v=5.5.1"></script>
+<script src="../assets/viz.js?v=11"></script>
+<script src="../data/retail.js?v=3"></script>
+<script>
+(function () {
+  const R = window.RETAIL, { fmt, css } = V, M = R.monthly;
+  const labels = M.months.map(m => { const [y, mo] = m.split("-"); return new Date(+y, +mo - 1, 1).toLocaleString("en-US", { month: "short" }) + " " + y.slice(2); });
+  const guest = M.gross.map((g, i) => Math.max(0, g - M.rev_new[i] - M.rev_returning[i]));
+  let metric = "sales";
+
+  // ---- KPIs
+  const T = R.totals;
+  const aov = M.gross.reduce((a, b) => a + b, 0) / M.orders.reduce((a, b) => a + b, 0);
+  [["Net sales, 24 months", fmt.gbp(T.net_revenue), true], ["Orders", fmt.compact(T.orders)], ["Average order", "£" + fmt.int(aov)], ["Customers who reordered", fmt.pct(T.repeat_rate)], ["Returned, by value", fmt.pct(T.return_rate)]]
+    .forEach(([l, v, hero]) => { const k = document.createElement("div"); k.className = "kpi" + (hero ? " hero" : ""); k.innerHTML = '<div class="label"></div><div class="value"></div>'; k.querySelector(".label").textContent = l; k.querySelector(".value").textContent = v; document.getElementById("kpis").appendChild(k); });
+
+  // ---- monthly
+  const NAMES = ["Returning customers", "New customers", "No customer ID"];
+  function monthLegend() {
+    const S = V.series();
+    if (metric === "sales") V.legend("lg-month", NAMES.map((n, i) => [n, S[i]]));
+    else document.getElementById("lg-month").textContent = "";
+  }
+  const monthChart = V.register("c-month", () => {
+    const S = V.series();
+    if (metric === "sales") {
+      return Object.assign(V.base(), {
+        xAxis: V.catAxis(labels), yAxis: V.valAxis(v => fmt.gbp(v)),
+        tooltip: Object.assign(V.base().tooltip, { axisPointer: { type: "shadow", shadowStyle: { color: "rgba(127,127,127,0.08)" } },
+          formatter: V.axisTip(v => fmt.gbp(v), { reverse: true, footer: { label: "Total", value: ps => fmt.gbp(ps.reduce((a, p) => a + p.value, 0)) } }) }),
+        series: V.stackedBars(NAMES, [M.rev_returning, M.rev_new, guest], [S[0], S[1], S[2]]),
+      });
+    }
+    const data = metric === "orders" ? M.orders : M.aov, f = metric === "orders" ? fmt.int : v => "£" + v.toFixed(0);
+    return Object.assign(V.base(), {
+      grid: { left: 8, right: 44, top: 24, bottom: 8, containLabel: true },
+      xAxis: V.catAxis(labels, { boundaryGap: false }), yAxis: V.valAxis(v => metric === "orders" ? fmt.compact(v) : "£" + v, { min: metric === "aov" ? 300 : 0 }),
+      tooltip: Object.assign(V.base().tooltip, { formatter: V.axisTip(f) }),
+      series: [{ name: metric === "orders" ? "Orders" : "Average order", type: "line", data, symbol: "circle", symbolSize: 8, showSymbol: false,
+        lineStyle: { width: 2, color: S[0] }, itemStyle: { color: S[0], borderColor: css("--surface-1"), borderWidth: 2 },
+        areaStyle: { color: S[0], opacity: 0.1 }, endLabel: { show: true, formatter: p => f(p.value), color: css("--ink-2"), fontSize: 11.5 } }],
+    });
+  });
+  document.querySelectorAll("#month-metric button").forEach(b => b.addEventListener("click", () => {
+    metric = b.dataset.m;
+    document.querySelectorAll("#month-metric button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    document.getElementById("month-title").textContent = { sales: "Monthly sales by customer type", orders: "Orders per month", aov: "Average order value" }[metric];
+    document.getElementById("month-sub").textContent = { sales: "Gross sales before returns, GBP", orders: "Count of invoices", aov: "Gross sales per invoice, GBP" }[metric];
+    monthLegend(); V.update(monthChart);
+  }));
+  monthLegend();
+  V.table(document.getElementById("t-month"), [{ key: "m", label: "Month" }, { key: "ret", label: "Returning", fmt: fmt.int }, { key: "new", label: "New", fmt: fmt.int }, { key: "g", label: "No ID", fmt: fmt.int }, { key: "net", label: "Net of returns", fmt: fmt.int }, { key: "o", label: "Orders", fmt: fmt.int }, { key: "aov", label: "Avg order", fmt: v => v.toFixed(0) }],
+    M.months.map((m, i) => ({ m, ret: M.rev_returning[i], new: M.rev_new[i], g: guest[i], net: M.net[i], o: M.orders[i], aov: M.aov[i] })), { sortKey: "m", dir: 1 });
+
+  // ---- cohort heatmap (months 1..12)
+  const CO = R.cohorts;
+  const coLabel = (c, i) => { const [y, mo] = c.split("-"); return new Date(+y, +mo - 1, 1).toLocaleString("en-US", { month: "short" }) + " " + y + "  (" + CO.sizes[i] + ")"; };
+  const ages = CO.ages.filter(a => a > 0);
+  const cohortChart = V.register("c-cohort", () => {
+    const data = [];
+    CO.cohorts.forEach((c, i) => ages.forEach((a, j) => { const v = CO.pct[i][CO.ages.indexOf(a)]; if (v != null) data.push([j, i, v]); }));
+    return Object.assign(V.base(), {
+      grid: { left: 8, right: 8, top: 8, bottom: 8, containLabel: true },
+      xAxis: V.catAxis(ages.map(a => "M" + a), { position: "top", axisLine: { show: false } }),
+      yAxis: V.catAxis(CO.cohorts.map(coLabel), { inverse: true, axisLine: { show: false }, axisLabel: { color: css("--ink-2"), fontSize: 11.5 } }),
+      visualMap: { show: false, min: 0, max: 50, dimension: 2, inRange: { color: V.seqStops() } },
+      tooltip: Object.assign(V.base().tooltip, { trigger: "item", formatter: p => '<div style="color:' + css("--ink-2") + ';font-size:12px">' + V.esc(CO.cohorts[p.value[1]]) + " cohort, month " + ages[p.value[0]] + "</div><b>" + p.value[2].toFixed(1) + "%</b> ordered again" }),
+      series: [{ type: "heatmap", data: data.map(d => ({ value: d, label: { color: V.inkFor(V.rampAt(V.seqStops(), Math.min(1, d[2] / 50))) } })),
+        itemStyle: { borderColor: css("--surface-1"), borderWidth: 2, borderRadius: 3 },
+        label: { show: true, fontSize: 10.5, formatter: p => Math.round(p.value[2]) }, emphasis: { itemStyle: { borderColor: css("--ink"), borderWidth: 1 } } }],
+    });
+  });
+  V.table(document.getElementById("t-cohort"), [{ key: "c", label: "Cohort" }, { key: "n", label: "Size", fmt: fmt.int }].concat(ages.map(a => ({ key: "m" + a, label: "M" + a, fmt: v => v == null ? "" : v.toFixed(0) + "%" }))),
+    CO.cohorts.map((c, i) => Object.assign({ c, n: CO.sizes[i] }, Object.fromEntries(ages.map(a => ["m" + a, CO.pct[i][CO.ages.indexOf(a)]])))), { sortKey: "c", dir: 1 });
+
+  // ---- RFM: share of customers vs share of revenue
+  const RF = R.rfm, cTot = RF.customers.reduce((a, b) => a + b, 0), rTot = RF.revenue.reduce((a, b) => a + b, 0);
+  const rfmChart = V.register("c-rfm", () => {
+    const S = V.series();
+    const bar = (name, vals, color) => ({ name, type: "bar", data: vals, barMaxWidth: 12, barGap: "30%", itemStyle: { color, borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: "right", color: css("--ink-2"), fontSize: 11, formatter: p => p.value.toFixed(0) + "%" } });
+    return Object.assign(V.base(), {
+      grid: { left: 8, right: 36, top: 4, bottom: 8, containLabel: true },
+      xAxis: V.valAxis(v => v + "%", { show: false, max: 75 }),
+      yAxis: V.catAxis(RF.segments, { inverse: true, axisLine: { show: false }, axisLabel: { color: css("--ink-2"), fontSize: 12 } }),
+      tooltip: Object.assign(V.base().tooltip, { axisPointer: { type: "shadow", shadowStyle: { color: "rgba(127,127,127,0.08)" } }, formatter: V.axisTip(v => v.toFixed(1) + "%") }),
+      series: [bar("Share of customers", RF.customers.map(c => c / cTot * 100), S[0]), bar("Share of revenue", RF.revenue.map(r => r / rTot * 100), S[1])],
+    });
+  });
+  V.legend("lg-rfm", [["Share of customers", V.series()[0]], ["Share of revenue", V.series()[1]]]);
+  V.table(document.getElementById("t-rfm"), [{ key: "s", label: "Segment", txt: true }, { key: "c", label: "Customers", fmt: fmt.int }, { key: "r", label: "Revenue", fmt: fmt.gbp }, { key: "d", label: "Median days since order", fmt: fmt.int }, { key: "o", label: "Median orders", fmt: v => v.toFixed(0) }],
+    RF.segments.map((s, i) => ({ s, c: RF.customers[i], r: RF.revenue[i], d: RF.median_recency_days[i], o: RF.median_orders[i] })), { sortKey: "r" });
+
+  // ---- Pareto
+  const PA = R.pareto, pct80 = PA.skus_for_80 / PA.skus * 100;
+  V.register("c-pareto", () => {
+    const S = V.series();
+    return Object.assign(V.base(), {
+      grid: { left: 8, right: 20, top: 24, bottom: 24, containLabel: true },
+      xAxis: V.valAxis(v => v + "%", { type: "value", max: 100, interval: 25, name: "Share of products", nameLocation: "middle", nameGap: 26, nameTextStyle: { color: css("--muted"), fontSize: 11.5 }, splitLine: { show: false }, axisLine: { show: true, lineStyle: { color: css("--axis") } } }),
+      yAxis: V.valAxis(v => v + "%", { max: 100, interval: 25 }),
+      tooltip: Object.assign(V.base().tooltip, { formatter: ps => { const p = ps[0]; return "Top <b>" + p.value[0].toFixed(0) + "%</b> of products make <b>" + p.value[1].toFixed(0) + "%</b> of revenue"; } }),
+      series: [{ name: "Cumulative revenue", type: "line", data: PA.sku_pct.map((x, i) => [x, PA.rev_pct[i]]), showSymbol: false, smooth: true,
+        lineStyle: { width: 2, color: S[0] }, areaStyle: { color: S[0], opacity: 0.1 },
+        markLine: { silent: true, symbol: "none", lineStyle: { color: css("--muted"), width: 1, type: "solid" },
+          label: { color: css("--ink-2"), fontSize: 11.5, formatter: "{b}" },
+          data: [[{ name: PA.skus_for_80.toLocaleString() + " products, " + pct80.toFixed(0) + "% of the range, make 80% of sales", coord: [0, 80], label: { position: "insideStartTop" } }, { coord: [pct80, 80] }], [{ coord: [pct80, 0], label: { show: false } }, { coord: [pct80, 80] }]] },
+        markPoint: { symbol: "circle", symbolSize: 9, itemStyle: { color: S[0], borderColor: css("--surface-1"), borderWidth: 2 }, label: { show: false }, data: [{ coord: [pct80, 80] }] } }],
+    });
+  });
+
+  // ---- weekday x hour
+  const HM = R.heat;
+  V.register("c-heat", () => {
+    const data = [], max = Math.max(...HM.orders.flat());
+    HM.orders.forEach((row, d) => row.forEach((v, h) => data.push([h, d, v])));
+    return Object.assign(V.base(), {
+      grid: { left: 8, right: 8, top: 8, bottom: 8, containLabel: true },
+      xAxis: V.catAxis(HM.hours.map(h => h + ":00"), { axisLine: { show: false }, axisLabel: { color: css("--muted"), fontSize: 11, interval: 1 } }),
+      yAxis: V.catAxis(HM.days, { inverse: true, axisLine: { show: false }, axisLabel: { color: css("--ink-2"), fontSize: 11.5 } }),
+      visualMap: { show: false, min: 0, max, dimension: 2, inRange: { color: V.seqStops() } },
+      tooltip: Object.assign(V.base().tooltip, { trigger: "item", formatter: p => '<div style="color:' + css("--ink-2") + ';font-size:12px">' + HM.days[p.value[1]] + ", " + HM.hours[p.value[0]] + ":00</div><b>" + fmt.int(p.value[2]) + "</b> invoices" }),
+      series: [{ type: "heatmap", data, itemStyle: { borderColor: css("--surface-1"), borderWidth: 2, borderRadius: 3 }, emphasis: { itemStyle: { borderColor: css("--ink"), borderWidth: 1 } } }],
+    });
+  });
+  V.table(document.getElementById("t-heat"), [{ key: "d", label: "Day" }].concat(HM.hours.map(h => ({ key: "h" + h, label: h + ":00", fmt: fmt.int }))),
+    HM.days.map((d, i) => Object.assign({ d }, Object.fromEntries(HM.hours.map((h, j) => ["h" + h, HM.orders[i][j]])))), { sortKey: "d", dir: 1 });
+
+  // ---- products table
+  V.table(document.getElementById("t-prod"), [
+    { key: "name", label: "Product", txt: true }, { key: "revenue", label: "Revenue", fmt: fmt.gbp, bar: true },
+    { key: "units", label: "Units", fmt: fmt.compact }, { key: "return_rate", label: "Returned", fmt: v => fmt.pct(v) },
+  ], R.top_products, { sortKey: "revenue" });
+
+  // ---- countries
+  const CT = R.countries, ctTot = CT.revenue.reduce((a, b) => a + b, 0), cname = n => n === "EIRE" ? "Ireland" : n;
+  V.register("c-ctry", () => Object.assign(V.base(), {
+    grid: { left: 8, right: 52, top: 4, bottom: 4, containLabel: true },
+    xAxis: V.valAxis(v => v, { show: false }),
+    yAxis: V.catAxis(CT.names.map(cname), { inverse: true, axisLine: { show: false }, axisLabel: { color: css("--ink-2"), fontSize: 12 } }),
+    tooltip: Object.assign(V.base().tooltip, { trigger: "item", formatter: p => '<div style="color:' + css("--ink-2") + ';font-size:12px">' + V.esc(p.name) + "</div><b>" + fmt.gbp(p.value) + "</b> (" + fmt.pct(p.value / ctTot * 100) + ")" }),
+    series: [{ type: "bar", data: CT.revenue, barMaxWidth: 14, itemStyle: { color: css("--s1"), borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: "right", color: css("--ink-2"), fontSize: 11.5, formatter: p => fmt.pct(p.value / ctTot * 100) } }],
+  }));
+  V.table(document.getElementById("t-ctry"), [{ key: "n", label: "Country", txt: true }, { key: "r", label: "Gross sales", fmt: fmt.gbp }, { key: "s", label: "Share", fmt: v => fmt.pct(v) }],
+    CT.names.map((n, i) => ({ n: cname(n), r: CT.revenue[i], s: CT.revenue[i] / ctTot * 100 })), { sortKey: "r" });
+
+  V.rerenderHooks.push(() => { monthLegend(); V.legend("lg-rfm", [["Share of customers", V.series()[0]], ["Share of revenue", V.series()[1]]]); });
+})();
+</script>
+</body>
+</html>

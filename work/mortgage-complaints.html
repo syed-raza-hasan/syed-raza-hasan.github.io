@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mortgage Complaints | Syed Raza Hasan</title>
+<meta name="description" content="Operations dashboard of US mortgage complaints to the CFPB, 2019 to 2026, joined with HMDA originations by state.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css?v=12">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+</head>
+<body data-source="CFPB Consumer Complaint Database and FFIEC HMDA. Analysis by Syed Raza Hasan.">
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html">Syed Raza Hasan<small>Finance and operations analytics</small></a>
+    <nav class="nav">
+      <a class="hide-sm" href="../index.html#capabilities">Capabilities</a>
+      <a class="hide-sm" href="../index.html#engagements">Engagements</a>
+      <a href="../index.html#insights">Insights</a>
+      <a href="../index.html#contact">Contact</a>
+      <button class="theme-btn" type="button" aria-label="Toggle theme"></button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="dash-head">
+    <div class="crumbs"><a href="../index.html#insights">&larr; Insights</a></div>
+    <p class="kicker">Insight &middot; Operations</p>
+    <h1>Mortgage complaints fell 14% while lending fell 62%</h1>
+    <p class="lede">189K mortgage complaints sent to the CFPB between January 2019 and August 2026, by company, issue and state, set against each state's loan volume. A servicing-quality view for compliance and operations teams.</p>
+    <div class="meta-row"><span><b>Sources</b> CFPB Consumer Complaint Database, FFIEC HMDA</span><span><b>Period</b> Jan 2019 to Aug 2026</span><span><b>Method</b> Python, pandas</span></div>
+  </div>
+
+  <div class="findings">
+    <h2>Key findings</h2>
+    <ol>
+      <li><b>Complaint volume stayed between 21K and 27K a year</b> from 2019 to 2025, while originations moved between 15M and 5.7M.</li>
+      <li><b>76% of 2025 complaints concerned paying the mortgage or difficulty paying it</b>, which places the driver in servicing.</li>
+      <li><b>There were 36 complaints per 10,000 loans originated in 2025.</b> The District of Columbia was highest at 116 and North Dakota lowest, under 10.</li>
+      <li><b>Over the last 12 months one large servicer answered 88.6% of complaints on time.</b> The other 14 companies in the top 15 were at 99% or above.</li>
+    </ol>
+  </div>
+
+  <div class="brief">
+    <div class="brief-who">
+      <h3>Context</h3>
+      <dl>
+        <dt>Who uses it</dt><dd>Head of servicing, complaints or compliance at a mortgage servicer</dd>
+        <dt>How often</dt><dd>Weekly for the scorecard, monthly for trends</dd>
+        <dt>Key question</dt><dd>Are we drawing more complaints than peers, about what, and are we answering on time?</dd>
+        <dt>Decision it supports</dt><dd>Which issue queue gets a process fix or extra staff, and when a response-time slip gets escalated</dd>
+        <dt>Existing report?</dt><dd>Raw complaint counts usually exist. Normalising by loan volume and benchmarking against peers is the new part.</dd>
+      </dl>
+    </div>
+    <ol class="chain">
+      <li><span>Metric</span><p>Complaints per 10K loans, on-time response rate, and share closed with relief.</p></li>
+      <li><span>Problem</span><p>Mortgage complaints held at 21K to 27K a year while originations fell 62%. Raw counts can't tell you whether service is improving.</p></li>
+      <li><span>Hypothesis</span><p>Complaints follow servicing pain, meaning payments and hardship, and move independently of new lending.<br><span class="verdict yes">Result: supported</span></p></li>
+      <li><span>Analysis</span><p>189K complaints by issue, company and state, joined to HMDA loan counts. <b>76% of 2025 complaints were about paying the mortgage or struggling to pay it.</b></p></li>
+      <li><span>Experiment</span><p>Send advance notice of payment changes to half of the affected borrowers for 60 days and compare complaints per 10K loans against the other half.</p></li>
+      <li><span>Decision</span><p><b>Watch per-10K and on-time rate every week.</b> Anything under 95% on time is escalated that week. One large servicer is at 88.6%.</p></li>
+    </ol>
+  </div>
+
+
+  <h2 style="font-size:20px;margin:8px 0 4px">Last 12 months</h2>
+  <p class="muted small" style="margin:0">September 2025 to August 2026</p>
+  <div class="kpis k4" id="kpis"></div>
+
+  <div class="panel" id="p-co" style="margin-bottom:16px">
+    <div class="panel-head">
+      <div><h3>Company scorecard</h3><p>The 15 companies with the most complaints. Click a column to sort.</p></div>
+    </div>
+    <div id="t-co" style="overflow:auto"></div>
+  </div>
+  <div class="dash-grid two">
+    <div class="panel" id="p-resp">
+      <div class="panel-head">
+        <div><h3>Company response to complaints</h3><p>Company response to consumer</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-resp" aria-pressed="false">Table</button></div>
+      </div>
+      <div class="chart" id="c-resp" style="height:210px"></div>
+      <div class="table-view" id="t-resp"></div>
+    </div>
+    <div class="panel" id="p-chan">
+      <div class="panel-head"><div><h3>Submission channel</h3><p>Submission channel</p></div></div>
+      <div class="chart" id="c-chan" style="height:210px"></div>
+    </div>
+  </div>
+
+  <h2 style="font-size:20px;margin:28px 0 4px">History</h2>
+  <div class="filters" role="group" aria-label="Filters">
+    <label>Year<select id="f-year"></select></label>
+    <span class="small muted" style="padding-bottom:8px">Highlights the year on the trend and heatmap, and sets the year for the map and state table.</span>
+  </div>
+
+  <div class="panel" id="p-month" style="margin:16px 0">
+    <div class="panel-head">
+      <div><h3>Complaints per month by product</h3><p>Click a legend item to hide or show it</p></div>
+      <div class="panel-tools"><button class="tbl-btn" data-panel="p-month" aria-pressed="false">Table</button></div>
+    </div>
+    <div id="lg-month"></div>
+    <div class="chart" id="c-month"></div>
+    <div class="table-view" id="t-month"></div>
+  </div>
+
+  <div class="dash-grid two">
+    <div class="panel" id="p-issue">
+      <div class="panel-head">
+        <div><h3>Complaint issues as a share of each year</h3><p>Share of each year's complaints. 2026 runs January to August.</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-issue" aria-pressed="false">Table</button></div>
+      </div>
+      <div class="chart tall" id="c-issue"></div>
+      <div class="table-view" id="t-issue"></div>
+    </div>
+    <div class="panel" id="p-map">
+      <div class="panel-head">
+        <div><h3 id="map-title">Complaints per 10K originations</h3><p>Complaints filed from the state over loans originated there</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-map" aria-pressed="false">Table</button></div>
+      </div>
+      <div id="tilemap"></div>
+      <div class="legend-scale" id="map-scale"></div>
+      <div class="table-view" id="t-map"></div>
+    </div>
+  </div>
+
+  <div class="method">
+    <h3>Methodology</h3>
+    <p>The CFPB publishes every complaint it forwards to a company. I streamed the full 5.5 GB file, kept Product = Mortgage, and grouped sub-products into five buckets. Complaints from before 2019 use an older issue list, so the page starts in January 2019. September 2026 is still being filled in and is left out. Relief means the company closed the complaint with monetary or non-monetary relief.</p>
+    <p>The per-10K ratio divides complaints from a state by HMDA originations in that state for the same year. It is a rough yardstick. Complaints come from everyone with a mortgage, including loans made years ago, so states with older or more distressed loan books will look worse on it.</p>
+    <p class="small muted">The CFPB does not verify complaint narratives. Volume reflects how many consumers chose to file and is not a measure of wrongdoing.</p>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap"><span>&copy; Syed Raza Hasan</span><span><a href="../index.html#contact">razahasan8993@gmail.com</a></span></div></footer>
+
+<script src="../assets/echarts.min.js?v=5.5.1"></script>
+<script src="../assets/viz.js?v=11"></script>
+<script src="../data/complaints.js?v=3"></script>
+<script src="../data/hmda.js?v=3"></script>
+<script>
+(function () {
+  const C = window.COMPLAINTS, H = window.HMDA, { fmt, css } = V;
+  const PROD = C.products;
+  const SHORT = {
+    "Trouble during payment process": "Trouble during payment",
+    "Struggling to pay mortgage": "Struggling to pay",
+    "Applying for a mortgage or refinancing an existing mortgage": "Applying or refinancing",
+    "Closing on a mortgage": "Closing on a mortgage",
+    "Incorrect information on your report": "Wrong info on credit report",
+    "Problem with a company's investigation into an existing problem": "Company's investigation",
+    "Problem with a credit reporting company's investigation into an existing problem": "Credit bureau investigation",
+    "Other": "Other",
+  };
+  const coName = n => {
+    if (n !== n.toUpperCase()) return n;
+    return n.toLowerCase().replace(/\b([a-z])/g, m => m.toUpperCase()).replace(/\bLlc\b/g, "LLC").replace(/\bU\.s\./g, "U.S.").replace(/\bJpmorgan\b/g, "JPMorgan").replace(/ (Of|And|The) /g, m => m.toLowerCase());
+  };
+  const MAPYEARS = Object.keys(C.per10k[H.states[0]]);
+  const state = { year: MAPYEARS[MAPYEARS.length - 1], hidden: new Set() };
+
+  // ---- KPIs (last 12 months)
+  const T = C.totals;
+  const kpi = [["Complaints", fmt.compact(T.last12) ], ["Answered on time", fmt.pct(T.timely_pct)], ["Closed with relief", fmt.pct(T.relief_pct)], ["Share of top 10 companies", fmt.pct(T.top10_share)]];
+  const kel = document.getElementById("kpis");
+  kpi.forEach(([l, v], i) => { const k = document.createElement("div"); k.className = "kpi" + (i === 0 ? " hero" : ""); k.innerHTML = '<div class="label"></div><div class="value"></div>'; k.querySelector(".label").textContent = l; k.querySelector(".value").textContent = v; kel.appendChild(k); });
+
+  // ---- company scorecard
+  const WARN = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z" fill="var(--status-warn)" stroke="var(--status-warn)"/><path d="M12 10v4M12 17.5v.01" stroke="#0b0b0b"/></svg>';
+  function timelyCell(r) {
+    const span = document.createElement("span");
+    if (r.timely_pct < 95) {
+      const c = document.createElement("span"); c.className = "chip"; c.innerHTML = WARN;
+      c.appendChild(document.createTextNode(fmt.pct(r.timely_pct) + " below 95%")); span.appendChild(c);
+    } else span.textContent = fmt.pct(r.timely_pct);
+    return span;
+  }
+  V.table(document.getElementById("t-co"), [
+    { key: "name", label: "Company", txt: true, fmt: coName },
+    { key: "complaints", label: "Complaints", fmt: fmt.int, bar: true },
+    { key: "timely_pct", label: "On time", render: timelyCell },
+    { key: "share", label: "Share of all", fmt: v => fmt.pct(v) },
+    { key: "relief_pct", label: "Closed with relief", fmt: v => fmt.pct(v) },
+    { key: "top_issue", label: "Most common issue", txt: true, fmt: v => SHORT[v] || v },
+  ], C.companies.map(c => Object.assign({ share: c.complaints / T.last12 * 100 }, c)), { sortKey: "complaints" });
+
+  // ---- response + channel (single series each: one color, no legend)
+  const hbar = (names, counts, total) => () => Object.assign(V.base(), {
+    grid: { left: 8, right: 56, top: 4, bottom: 4, containLabel: true },
+    xAxis: V.valAxis(v => fmt.compact(v), { show: false }),
+    yAxis: V.catAxis(names.slice().reverse(), { axisLine: { show: false }, axisLabel: { color: css("--ink-2"), fontSize: 12 } }),
+    tooltip: Object.assign(V.base().tooltip, { trigger: "item", formatter: p => '<div style="color:' + css("--ink-2") + ';font-size:12px">' + V.esc(p.name) + '</div><b>' + fmt.int(p.value) + "</b> (" + fmt.pct(p.value / total * 100) + ")" }),
+    series: [{ type: "bar", data: counts.slice().reverse(), barMaxWidth: 14, itemStyle: { color: css("--s1"), borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: "right", color: css("--ink-2"), fontSize: 11.5, formatter: p => fmt.pct(p.value / total * 100) } }],
+  });
+  const respTotal = C.responses.counts.reduce((a, b) => a + b, 0);
+  V.register("c-resp", hbar(C.responses.names.map(n => n.replace("Closed with ", "With ").replace("explanation", "explanation only")), C.responses.counts, respTotal));
+  V.table(document.getElementById("t-resp"), [{ key: "n", label: "Response", txt: true }, { key: "c", label: "Complaints", fmt: fmt.int }, { key: "p", label: "Share", fmt: v => fmt.pct(v) }],
+    C.responses.names.map((n, i) => ({ n, c: C.responses.counts[i], p: C.responses.counts[i] / respTotal * 100 })), { sortKey: "c" });
+  const chTotal = C.channels.counts.reduce((a, b) => a + b, 0);
+  V.register("c-chan", hbar(C.channels.names, C.channels.counts, chTotal));
+
+  // ---- year filter
+  const fYear = document.getElementById("f-year");
+  MAPYEARS.slice().reverse().forEach(y => { const o = document.createElement("option"); o.value = y; o.textContent = y; fYear.appendChild(o); });
+  fYear.value = state.year;
+  fYear.addEventListener("change", () => { state.year = fYear.value; draw(); });
+
+  // ---- monthly trend
+  function monthLegend() {
+    const S = V.series(), el = document.getElementById("lg-month");
+    el.textContent = ""; el.className = "legend";
+    PROD.forEach((p, i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.setAttribute("aria-pressed", !state.hidden.has(p));
+      b.style.cssText = "display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:2px 0;cursor:pointer;font:inherit;color:var(--ink-2);" + (state.hidden.has(p) ? "opacity:.4;text-decoration:line-through" : "");
+      const i_ = document.createElement("i"); i_.style.background = S[i]; i_.style.cssText += ";width:10px;height:10px;border-radius:3px;display:inline-block";
+      b.appendChild(i_); b.appendChild(document.createTextNode(p));
+      b.addEventListener("click", () => { state.hidden.has(p) ? state.hidden.delete(p) : state.hidden.add(p); if (state.hidden.size === PROD.length) state.hidden.delete(p); monthLegend(); V.update(monthChart); });
+      el.appendChild(b);
+    });
+  }
+  const monthChart = V.register("c-month", () => {
+    const S = V.series(), M = C.monthly.months;
+    const show = PROD.filter(p => !state.hidden.has(p));
+    const labels = M.map(m => { const [y, mo] = m.split("-"); return new Date(+y, +mo - 1, 1).toLocaleString("en-US", { month: "short" }) + " " + y; });
+    const series = V.stackedBars(show, show.map(p => C.monthly.series[p]), show.map(p => S[PROD.indexOf(p)]), { gap: "25%", borderWidth: 0.5 });
+    const first = M.findIndex(m => m.startsWith(state.year)), last = M.length - 1 - M.slice().reverse().findIndex(m => m.startsWith(state.year));
+    series[0].markArea = { silent: true, itemStyle: { color: V.isDark() ? "rgba(255,255,255,0.05)" : "rgba(11,11,11,0.045)" }, data: [[{ xAxis: labels[first] }, { xAxis: labels[last] }]] };
+    return Object.assign(V.base(), {
+      xAxis: V.catAxis(labels, { axisLabel: { color: css("--muted"), fontSize: 11.5, interval: (i) => M[i].endsWith("-01"), formatter: v => v.split(" ")[1] } }),
+      yAxis: V.valAxis(v => fmt.compact(v)),
+      tooltip: Object.assign(V.base().tooltip, { axisPointer: { type: "shadow", shadowStyle: { color: "rgba(127,127,127,0.08)" } },
+        formatter: V.axisTip(v => fmt.int(v), { reverse: true, footer: show.length > 1 ? { label: "Total", value: ps => fmt.int(ps.reduce((a, p) => a + (p.value || 0), 0)) } : null }) }),
+      series,
+    });
+  });
+  V.table(document.getElementById("t-month"), [{ key: "m", label: "Month" }].concat(PROD.map(p => ({ key: p, label: p, fmt: fmt.int }))).concat([{ key: "t", label: "Total", fmt: fmt.int }]),
+    C.monthly.months.map((m, i) => Object.assign({ m }, Object.fromEntries(PROD.map(p => [p, C.monthly.series[p][i]])), { t: PROD.reduce((a, p) => a + C.monthly.series[p][i], 0) })), { sortKey: "m", dir: -1 });
+
+  // ---- issue heatmap (share of the year's complaints)
+  const IY = C.issues.years.map(String);
+  const yearTot = IY.map((_, j) => C.issues.names.reduce((a, n) => a + C.issues.counts[n][j], 0));
+  // rows that never reach 1% of a year's complaints only add empty cells
+  const IN = C.issues.names.filter(n => C.issues.counts[n].some((v, j) => v / yearTot[j] >= 0.01));
+  const issueChart = V.register("c-issue", () => {
+    const data = [];
+    IN.forEach((n, i) => IY.forEach((y, j) => data.push([j, i, +(C.issues.counts[n][j] / yearTot[j] * 100).toFixed(1), C.issues.counts[n][j]])));
+    const yi = IY.indexOf(state.year);
+    return Object.assign(V.base(), {
+      grid: { left: 8, right: 8, top: 8, bottom: 8, containLabel: true },
+      xAxis: V.catAxis(IY.map(y => y === "2026" ? "2026*" : y), { position: "top", axisLine: { show: false },
+        axisLabel: { color: css("--muted"), fontSize: 11.5, fontWeight: (v) => 400, formatter: (v, i) => i === yi ? "{s|" + v + "}" : v, rich: { s: { color: css("--ink"), fontWeight: 600, fontSize: 11.5 } } } }),
+      yAxis: V.catAxis(IN.map(n => SHORT[n] || n), { inverse: true, axisLine: { show: false }, axisLabel: { color: css("--ink-2"), fontSize: 11.5, width: 150, overflow: "truncate" } }),
+      visualMap: { show: false, min: 0, max: 55, dimension: 2, inRange: { color: V.seqStops() } },
+      tooltip: Object.assign(V.base().tooltip, { trigger: "item", formatter: p => '<div style="color:' + css("--ink-2") + ';font-size:12px">' + V.esc(IN[p.value[1]]) + ", " + IY[p.value[0]] + "</div><b>" + p.value[2].toFixed(1) + "%</b> of complaints (" + fmt.int(p.value[3]) + ")" }),
+      series: [{ type: "heatmap", data, itemStyle: { borderColor: css("--surface-1"), borderWidth: 2, borderRadius: 3 },
+        label: { show: true, fontSize: 10.5, formatter: p => p.value[2] >= 1 ? Math.round(p.value[2]) + "%" : "", color: "#0b0b0b" },
+        emphasis: { itemStyle: { borderColor: css("--ink"), borderWidth: 1 } } }],
+    });
+  });
+  // labels inside cells pick ink by fill luminance
+  function issueLabelColors() {
+    const o = issueChart.chart.getOption(), stops = V.seqStops();
+    o.series[0].data = o.series[0].data.map(d => ({ value: d.value || d, label: { color: V.inkFor(V.rampAt(stops, (d.value || d)[2] / 55)) } }));
+    issueChart.chart.setOption({ series: o.series });
+  }
+  issueLabelColors();
+  V.table(document.getElementById("t-issue"), [{ key: "n", label: "Issue", txt: true }].concat(IY.map((y, j) => ({ key: y, label: y, fmt: v => fmt.pct(v) }))),
+    IN.map(n => Object.assign({ n: SHORT[n] || n }, Object.fromEntries(IY.map((y, j) => [y, C.issues.counts[n][j] / yearTot[j] * 100])))), { sortKey: IY[IY.length - 2] });
+
+  // ---- map
+  function drawMap() {
+    const rows = H.states.map(s => { const [c, r] = C.per10k[s][state.year]; const orig = H.by_purpose[s][state.year].reduce((a, x) => a + x[1], 0); return { st: s, name: H.state_names[s], complaints: c, orig, rate: r }; });
+    const vals = Object.fromEntries(rows.map(r => [r.st, r.rate]));
+    const arr = rows.map(r => r.rate).filter(v => v != null).sort((a, b) => a - b);
+    const lo = arr[0], hi = arr[Math.floor(arr.length * 0.96)]; // cap so DC doesn't wash out the rest
+    document.getElementById("map-title").textContent = "Complaints per 10K originations, " + state.year;
+    V.tileMap(document.getElementById("tilemap"), {
+      values: vals, color: v => V.rampAt(V.seqStops(), (v - lo) / (hi - lo)),
+      title: s => H.state_names[s],
+      tipRows: s => { const r = rows.find(x => x.st === s); return [["Per 10K originations", r.rate.toFixed(1)], ["Complaints", fmt.int(r.complaints)], ["Originations", fmt.int(r.orig)]]; },
+    });
+    document.getElementById("map-scale").innerHTML = "<span>" + lo.toFixed(0) + "</span><span class='ramp' style='background:linear-gradient(90deg," + V.seqStops().join(",") + ")'></span><span>" + hi.toFixed(0) + "+</span>";
+    V.table(document.getElementById("t-map"), [{ key: "name", label: "State", txt: true }, { key: "rate", label: "Per 10K", fmt: v => v.toFixed(1) }, { key: "complaints", label: "Complaints", fmt: fmt.int }, { key: "orig", label: "Originations", fmt: fmt.int }], rows, { sortKey: "rate" });
+  }
+
+  function draw() { monthLegend(); V.update(monthChart); V.update(issueChart); issueLabelColors(); drawMap(); }
+  V.rerenderHooks.push(() => { monthLegend(); issueLabelColors(); drawMap(); });
+  draw();
+})();
+</script>
+</body>
+</html>

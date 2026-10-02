@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US Mortgage Market | Syed Raza Hasan</title>
+<meta name="description" content="Interactive dashboard of US mortgage applications, originations and denials by state, 2018 to 2025, built on public HMDA data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css?v=12">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+</head>
+<body data-source="FFIEC HMDA Data Browser, 2018 to 2025. Analysis by Syed Raza Hasan.">
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html">Syed Raza Hasan<small>Finance and operations analytics</small></a>
+    <nav class="nav">
+      <a class="hide-sm" href="../index.html#capabilities">Capabilities</a>
+      <a class="hide-sm" href="../index.html#engagements">Engagements</a>
+      <a href="../index.html#insights">Insights</a>
+      <a href="../index.html#contact">Contact</a>
+      <button class="theme-btn" type="button" aria-label="Toggle theme"></button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="dash-head">
+    <div class="crumbs"><a href="../index.html#insights">&larr; Insights</a></div>
+    <p class="kicker">Insight &middot; Lending</p>
+    <h1>US mortgage originations rose 10% in 2025, led by refinancing</h1>
+    <p class="lede">Eight years of US mortgage applications, 2018 to 2025, by state, loan purpose and loan type. Select a state on the map or in the table to filter the page.</p>
+    <div class="meta-row"><span><b>Source</b> FFIEC HMDA Data Browser</span><span><b>Coverage</b> 120M+ applications, 50 states and DC</span><span><b>Method</b> Python, pandas</span></div>
+  </div>
+
+  <div class="findings">
+    <h2>Key findings</h2>
+    <ol>
+      <li><b>Originations fell 62% between 2021 and 2023</b>, from 15.1M to 5.7M as rates rose, and recovered to 6.8M in 2025.</li>
+      <li><b>Refinance and cash-out loans made up 84% of the 2025 increase.</b> Purchase originations grew 1.6%.</li>
+      <li><b>The average originated loan is 37% larger than in 2018</b>, at $353K, and the FHA share of originations rose from 9.2% in 2021 to 13.2%.</li>
+      <li><b>Denial rates rose from 12.5% in 2021 to 20.1% in 2023</b> and eased to 17.8% in 2025.</li>
+    </ol>
+  </div>
+
+  <div class="brief">
+    <div class="brief-who">
+      <h3>Context</h3>
+      <dl>
+        <dt>Who uses it</dt><dd>Head of growth or retail lending at a lender or broker</dd>
+        <dt>How often</dt><dd>Quarterly planning, and again when each year's HMDA data lands. Monthly if fed with the lender's own pipeline.</dd>
+        <dt>Key question</dt><dd>Which states and loan types should get more loan officers and marketing next year?</dd>
+        <dt>Decision it supports</dt><dd>Where to add or cut sales capacity and spend, by state and product</dd>
+        <dt>Existing report?</dt><dd>Lenders see their own volume. This adds the whole market, so growth and share have a benchmark.</dd>
+      </dl>
+    </div>
+    <ol class="chain">
+      <li><span>Metric</span><p>Originations by state and purpose, year on year, with denial rate as the quality check.</p></li>
+      <li><span>Problem</span><p>Volume fell 62% from 2021 to 2023 and is coming back unevenly. Spreading sales effort evenly across states wastes it.</p></li>
+      <li><span>Hypothesis</span><p>The 2025 recovery is refinance-led and strongest in expensive states.<br><span class="verdict part">Result: partly supported</span></p></li>
+      <li><span>Analysis</span><p>120M applications cut by state, year, purpose and loan type. <b>Refinance and cash-out made up 84% of the 2025 increase</b>, while purchase grew 1.6%. Loan size barely explains which states grew (correlation 0.19).</p></li>
+      <li><span>Experiment</span><p>Move a fixed slice of marketing into the five fastest-growing states for one quarter, keep matched states flat as a control, and compare cost per funded loan.</p></li>
+      <li><span>Decision</span><p><b>Staff refinance capacity first.</b> Pick expansion states on growth and denial rate together. Loan size is a weak guide.</p></li>
+    </ol>
+  </div>
+
+
+  <div class="filters" role="group" aria-label="Filters">
+    <label>Geography<select id="f-geo"></select></label>
+    <label>Loan purpose<select id="f-purpose"></select></label>
+    <label>Year<select id="f-year"></select></label>
+    <button class="reset" id="f-reset" type="button">Reset</button>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="dash-grid wide-left">
+    <div class="panel" id="p-purpose">
+      <div class="panel-head">
+        <div><h3>Originations by loan purpose</h3><p id="purpose-sub">Count of originated loans</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-purpose" aria-pressed="false">Table</button></div>
+      </div>
+      <div id="lg-purpose"></div>
+      <div class="chart" id="c-purpose"></div>
+      <div class="table-view" id="t-purpose"></div>
+    </div>
+    <div class="panel" id="p-rates">
+      <div class="panel-head">
+        <div><h3>Denial and withdrawal rates</h3><p>Share of applications</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-rates" aria-pressed="false">Table</button></div>
+      </div>
+      <div id="lg-rates"></div>
+      <div class="chart" id="c-rates"></div>
+      <div class="table-view" id="t-rates"></div>
+    </div>
+  </div>
+
+  <div class="dash-grid wide-left">
+    <div class="panel" id="p-map">
+      <div class="panel-head">
+        <div><h3 id="map-title">Change in originations vs prior year</h3><p id="map-sub">Click a state to filter the page</p></div>
+        <div class="panel-tools">
+          <div class="seg" id="map-metric" role="group" aria-label="Map metric">
+            <button type="button" data-m="yoy" aria-pressed="true">Change</button>
+            <button type="button" data-m="deny" aria-pressed="false">Denial rate</button>
+            <button type="button" data-m="avg" aria-pressed="false">Avg loan</button>
+          </div>
+          <button class="tbl-btn" data-panel="p-map" aria-pressed="false">Table</button>
+        </div>
+      </div>
+      <div id="tilemap"></div>
+      <div class="legend-scale" id="map-scale"></div>
+      <div class="table-view" id="t-map"></div>
+    </div>
+    <div class="panel" id="p-type">
+      <div class="panel-head">
+        <div><h3>Loan type mix</h3><p>Share of originations, all purposes</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-type" aria-pressed="false">Table</button></div>
+      </div>
+      <div id="lg-type"></div>
+      <div class="chart" id="c-type"></div>
+      <div class="table-view" id="t-type"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="p-states" style="margin-bottom:16px">
+    <div class="panel-head">
+      <div><h3 id="states-title">States ranked</h3><p>Click a column to sort, click a row to filter</p></div>
+    </div>
+    <div id="t-states" style="max-height:440px;overflow:auto"></div>
+  </div>
+
+  <div class="method">
+    <h3>Methodology</h3>
+    <p>I pulled state-by-year aggregates for 2018 to 2025 from the FFIEC HMDA Data Browser API, two cuts per state and year (action taken by loan purpose, and action taken by loan type), 816 calls in all. Applications are action codes 1 to 5, which leaves out purchased loans and preapproval requests. Originations are code 1, the denial rate is denied applications over all applications, and the average loan is originated dollars over originated count. 2025 is the latest annual release. The 50 states plus DC add up to within 0.3% of the national figure. The gap is Puerto Rico and the other territories, which I left out.</p>
+    <p class="small muted">HMDA covers most US mortgage lending but leaves out some small and rural lenders. Data reflects lender submissions and is not adjusted.</p>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap"><span>&copy; Syed Raza Hasan</span><span><a href="../index.html#contact">razahasan8993@gmail.com</a></span></div></footer>
+
+<script src="../assets/echarts.min.js?v=5.5.1"></script>
+<script src="../assets/viz.js?v=11"></script>
+<script src="../data/hmda.js?v=3"></script>
+<script>
+(function () {
+  const D = window.HMDA, { fmt, css } = V;
+  const YEARS = D.years.map(String), P = D.purposes, T = D.types;
+  const state = { geo: "US", purpose: "all", year: YEARS[YEARS.length - 1], metric: "yoy" };
+
+  // ---- aggregation
+  const add = (a, b) => a.map((x, i) => x + b[i]);
+  const zero = () => [0, 0, 0, 0, 0];
+  const US = { by_purpose: {}, by_type: {} };
+  YEARS.forEach(y => {
+    US.by_purpose[y] = P.map((_, i) => D.states.reduce((acc, s) => add(acc, D.by_purpose[s][y][i]), zero()));
+    US.by_type[y] = T.map((_, i) => D.states.reduce((acc, s) => add(acc, D.by_type[s][y][i]), zero()));
+  });
+  const cube = (geo, kind) => geo === "US" ? US[kind] : D[kind][geo];
+  function totals(geo, year, purpose) {
+    const rows = cube(geo, "by_purpose")[year];
+    if (purpose === "all") return rows.reduce(add, zero());
+    return rows[P.indexOf(purpose)].slice();
+  }
+  const prevYear = y => { const i = YEARS.indexOf(y); return i > 0 ? YEARS[i - 1] : null; };
+  const geoName = g => g === "US" ? "United States" : D.state_names[g];
+  const avgLoan = t => t[1] ? t[2] * 1e6 / t[1] : null;
+  const denyRate = t => t[0] ? t[3] / t[0] * 100 : null;
+  const wdRate = t => t[0] ? t[4] / t[0] * 100 : null;
+
+  // ---- filters
+  const fGeo = document.getElementById("f-geo"), fPur = document.getElementById("f-purpose"), fYear = document.getElementById("f-year");
+  const opt = (sel, v, label) => { const o = document.createElement("option"); o.value = v; o.textContent = label; sel.appendChild(o); };
+  opt(fGeo, "US", "United States");
+  D.states.slice().sort((a, b) => D.state_names[a].localeCompare(D.state_names[b])).forEach(s => opt(fGeo, s, D.state_names[s]));
+  opt(fPur, "all", "All purposes"); P.forEach(p => opt(fPur, p, p));
+  YEARS.slice().reverse().forEach(y => opt(fYear, y, y));
+  function syncFilters() { fGeo.value = state.geo; fPur.value = state.purpose; fYear.value = state.year; }
+  fGeo.addEventListener("change", () => { state.geo = fGeo.value; draw(); });
+  fPur.addEventListener("change", () => { state.purpose = fPur.value; draw(); });
+  fYear.addEventListener("change", () => { state.year = fYear.value; draw(); });
+  document.getElementById("f-reset").addEventListener("click", () => { state.geo = "US"; state.purpose = "all"; state.year = YEARS[YEARS.length - 1]; draw(); });
+  document.querySelectorAll("#map-metric button").forEach(b => b.addEventListener("click", () => {
+    state.metric = b.dataset.m;
+    document.querySelectorAll("#map-metric button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    drawMap();
+  }));
+  function selectGeo(g) { state.geo = state.geo === g ? "US" : g; draw(); window.scrollTo({ top: document.querySelector(".filters").offsetTop - 70, behavior: "smooth" }); }
+
+  // ---- KPIs
+  function delta(cur, prev, kind, goodUp) {
+    if (prev == null || cur == null) return '<div class="delta">No prior year</div>';
+    let d, txt;
+    if (kind === "pts") { d = cur - prev; txt = (d > 0 ? "+" : d < 0 ? "−" : "") + Math.abs(d).toFixed(1) + " pts"; }
+    else { d = (cur / prev - 1) * 100; txt = fmt.signedPct(d); }
+    const cls = Math.abs(d) < 0.05 || goodUp == null ? "" : (d > 0) === goodUp ? "up" : "down";
+    return '<div class="delta ' + cls + '">' + txt + " vs " + prevYear(state.year) + "</div>";
+  }
+  function drawKpis() {
+    const t = totals(state.geo, state.year, state.purpose);
+    const py = prevYear(state.year), p = py ? totals(state.geo, py, state.purpose) : null;
+    const items = [
+      ["Originations", fmt.compact(t[1]), delta(t[1], p && p[1], "pct", true), true],
+      ["Dollar volume", fmt.usd(t[2] * 1e6), delta(t[2], p && p[2], "pct", true)],
+      ["Average loan", fmt.usd(avgLoan(t)), delta(avgLoan(t), p && avgLoan(p), "pct", null)],
+      ["Denial rate", fmt.pct(denyRate(t)), delta(denyRate(t), p && denyRate(p), "pts", false)],
+      ["Withdrawal rate", fmt.pct(wdRate(t)), delta(wdRate(t), p && wdRate(p), "pts", false)],
+    ];
+    const el = document.getElementById("kpis"); el.textContent = "";
+    items.forEach(([label, value, d, hero]) => {
+      const k = document.createElement("div"); k.className = "kpi" + (hero ? " hero" : "");
+      k.innerHTML = '<div class="label"></div><div class="value"></div>' + d;
+      k.querySelector(".label").textContent = label + (label === "Originations" ? ", " + state.year : "");
+      k.querySelector(".value").textContent = value;
+      el.appendChild(k);
+    });
+  }
+
+  // ---- charts
+  const purposeChart = V.register("c-purpose", () => {
+    const S = V.series(), rows = cube(state.geo, "by_purpose");
+    const show = state.purpose === "all" ? P : [state.purpose];
+    const data = show.map(p => YEARS.map(y => rows[y][P.indexOf(p)][1]));
+    const colors = show.map(p => S[P.indexOf(p)]);
+    return Object.assign(V.base(), {
+      xAxis: V.catAxis(YEARS), yAxis: V.valAxis(v => fmt.compact(v)),
+      tooltip: Object.assign(V.base().tooltip, { axisPointer: { type: "shadow", shadowStyle: { color: "rgba(127,127,127,0.07)" } },
+        formatter: V.axisTip(v => fmt.int(v), { reverse: true, footer: show.length > 1 ? { label: "Total", value: ps => fmt.int(ps.reduce((a, p) => a + (p.value || 0), 0)) } : null }) }),
+      series: V.stackedBars(show, data, colors),
+    });
+  });
+  const ratesChart = V.register("c-rates", () => {
+    const S = V.series(), rows = cube(state.geo, "by_purpose");
+    const tot = y => state.purpose === "all" ? rows[y].reduce(add, zero()) : rows[y][P.indexOf(state.purpose)];
+    const line = (name, f, color) => ({ name, type: "line", data: YEARS.map(y => f(tot(y))), smooth: false, symbol: "circle", symbolSize: 8, showSymbol: false,
+      lineStyle: { width: 2, color }, itemStyle: { color, borderColor: css("--surface-1"), borderWidth: 2 },
+      endLabel: { show: true, formatter: p => p.value.toFixed(1) + "%", color: css("--ink-2"), fontSize: 11.5 }, emphasis: { focus: "series" } });
+    return Object.assign(V.base(), {
+      grid: { left: 8, right: 48, top: 24, bottom: 8, containLabel: true },
+      xAxis: V.catAxis(YEARS, { boundaryGap: false }), yAxis: V.valAxis(v => v + "%", { min: 0 }),
+      tooltip: Object.assign(V.base().tooltip, { formatter: V.axisTip(v => v.toFixed(1) + "%") }),
+      series: [line("Denial rate", denyRate, S[0]), line("Withdrawal rate", wdRate, S[1])],
+    });
+  });
+  const typeChart = V.register("c-type", () => {
+    const S = V.series(), rows = cube(state.geo, "by_type");
+    const share = YEARS.map(y => { const tot = rows[y].reduce((a, r) => a + r[1], 0); return rows[y].map(r => tot ? r[1] / tot * 100 : 0); });
+    const data = T.map((_, i) => share.map(s => +s[i].toFixed(2)));
+    return Object.assign(V.base(), {
+      xAxis: V.catAxis(YEARS), yAxis: V.valAxis(v => v + "%", { max: 100, interval: 25 }),
+      tooltip: Object.assign(V.base().tooltip, { axisPointer: { type: "shadow", shadowStyle: { color: "rgba(127,127,127,0.07)" } }, formatter: V.axisTip(v => v.toFixed(1) + "%", { reverse: true }) }),
+      series: V.stackedBars(T, data, [S[0], S[1], S[2], S[3]]),
+    });
+  });
+
+  function legends() {
+    const S = V.series();
+    V.legend("lg-purpose", (state.purpose === "all" ? P : [state.purpose]).map(p => [p, S[P.indexOf(p)]]));
+    V.legend("lg-rates", [["Denial rate", S[0]], ["Withdrawal rate", S[1]]], "line");
+    V.legend("lg-type", T.map((t, i) => [t, S[i]]));
+  }
+
+  // ---- tables for chart panels
+  function chartTables() {
+    const rows = cube(state.geo, "by_purpose"), trows = cube(state.geo, "by_type");
+    V.table(document.getElementById("t-purpose"), [{ key: "year", label: "Year" }].concat(P.map(p => ({ key: p, label: p, fmt: fmt.int }))),
+      YEARS.map(y => Object.assign({ year: y }, Object.fromEntries(P.map((p, i) => [p, rows[y][i][1]])))), { sortKey: "year", dir: 1 });
+    V.table(document.getElementById("t-rates"), [{ key: "year", label: "Year" }, { key: "apps", label: "Applications", fmt: fmt.int }, { key: "deny", label: "Denial rate", fmt: v => fmt.pct(v) }, { key: "wd", label: "Withdrawal rate", fmt: v => fmt.pct(v) }],
+      YEARS.map(y => { const t = state.purpose === "all" ? rows[y].reduce(add, zero()) : rows[y][P.indexOf(state.purpose)]; return { year: y, apps: t[0], deny: denyRate(t), wd: wdRate(t) }; }), { sortKey: "year", dir: 1 });
+    V.table(document.getElementById("t-type"), [{ key: "year", label: "Year" }].concat(T.map(t => ({ key: t, label: t, fmt: fmt.int }))),
+      YEARS.map(y => Object.assign({ year: y }, Object.fromEntries(T.map((t, i) => [t, trows[y][i][1]])))), { sortKey: "year", dir: 1 });
+  }
+
+  // ---- state table + map share one dataset
+  function stateRows() {
+    const py = prevYear(state.year);
+    return D.states.map(s => {
+      const t = totals(s, state.year, state.purpose), p = py ? totals(s, py, state.purpose) : null;
+      return { st: s, name: D.state_names[s], orig: t[1], vol: t[2] * 1e6, avg: avgLoan(t), deny: denyRate(t), yoy: p && p[1] ? (t[1] / p[1] - 1) * 100 : null };
+    });
+  }
+  function drawStatesTable(rows) {
+    document.getElementById("states-title").textContent = "States ranked, " + state.year + (state.purpose === "all" ? "" : " (" + state.purpose + ")");
+    const cols = [
+      { key: "name", label: "State", txt: true },
+      { key: "orig", label: "Originations", fmt: fmt.int, bar: true },
+      { key: "vol", label: "Volume", fmt: fmt.usd },
+      { key: "avg", label: "Avg loan", fmt: fmt.usd },
+      { key: "deny", label: "Denial rate", fmt: v => fmt.pct(v) },
+      { key: "yoy", label: "vs prior year", fmt: v => fmt.signedPct(v) },
+    ];
+    V.table(document.getElementById("t-states"), cols, rows, { sortKey: "orig", selected: r => r.st === state.geo, onRow: r => selectGeo(r.st) });
+  }
+  function drawMap() {
+    const rows = stateRows(), by = Object.fromEntries(rows.map(r => [r.st, r]));
+    let metric = state.metric;
+    if (metric === "yoy" && !prevYear(state.year)) metric = "deny";
+    const key = metric, vals = Object.fromEntries(rows.map(r => [r.st, r[key]]));
+    const arr = rows.map(r => r[key]).filter(v => v != null);
+    let color, scaleHtml, title;
+    const scale = document.getElementById("map-scale");
+    if (key === "yoy") {
+      const m = Math.max(5, Math.ceil(Math.max(...arr.map(Math.abs)) / 5) * 5);
+      color = v => V.rampAt(V.divStops(), (v + m) / (2 * m));
+      title = "Change in originations, " + prevYear(state.year) + " to " + state.year;
+      scale.innerHTML = "<span>&minus;" + m + "%</span><span class='ramp' style='background:linear-gradient(90deg," + V.divStops().join(",") + ")'></span><span>+" + m + "%</span>";
+    } else {
+      const lo = Math.min(...arr), hi = Math.max(...arr);
+      color = v => V.rampAt(V.seqStops(), (v - lo) / ((hi - lo) || 1));
+      title = (key === "deny" ? "Denial rate, " : "Average loan size, ") + state.year;
+      const f = key === "deny" ? v => fmt.pct(v) : fmt.usd;
+      scale.innerHTML = "<span>" + f(lo) + "</span><span class='ramp' style='background:linear-gradient(90deg," + V.seqStops().join(",") + ")'></span><span>" + f(hi) + "</span>";
+    }
+    document.getElementById("map-title").textContent = title + (state.purpose === "all" ? "" : " (" + state.purpose + ")");
+    V.tileMap(document.getElementById("tilemap"), {
+      values: vals, color, selected: state.geo,
+      title: s => D.state_names[s],
+      tipRows: s => { const r = by[s]; return [["Originations", fmt.int(r.orig)], ["vs prior year", fmt.signedPct(r.yoy)], ["Denial rate", fmt.pct(r.deny)], ["Avg loan", fmt.usd(r.avg)]]; },
+      onClick: selectGeo,
+    });
+    V.table(document.getElementById("t-map"), [{ key: "name", label: "State", txt: true }, { key: key, label: key === "yoy" ? "vs prior year" : key === "deny" ? "Denial rate" : "Avg loan", fmt: key === "yoy" ? v => fmt.signedPct(v) : key === "deny" ? v => fmt.pct(v) : fmt.usd }], rows, { sortKey: key });
+    drawStatesTable(rows);
+  }
+
+  function draw() {
+    syncFilters();
+    document.getElementById("purpose-sub").textContent = geoName(state.geo) + ", count of originated loans";
+    drawKpis(); legends();
+    V.update(purposeChart); V.update(ratesChart); V.update(typeChart);
+    chartTables(); drawMap();
+  }
+  V.rerenderHooks.push(() => { legends(); drawMap(); });
+  draw();
+})();
+</script>
+</body>
+</html>

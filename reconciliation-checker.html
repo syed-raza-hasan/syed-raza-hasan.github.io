@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reconciliation Checker | Syed Raza Hasan</title>
+<meta name="description" content="Compare two CSV files and list every line that does not agree. Runs in the browser. Files are not uploaded.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=12">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html">Syed Raza Hasan<small>Finance and operations analytics</small></a>
+    <nav class="nav">
+      <a class="hide-sm" href="index.html#capabilities">Capabilities</a>
+      <a class="hide-sm" href="index.html#engagements">Engagements</a>
+      <a href="index.html#insights">Insights</a>
+      <a href="index.html#contact">Contact</a>
+      <button class="theme-btn" type="button" aria-label="Toggle theme"></button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="dash-head">
+    <div class="crumbs"><a href="index.html#insights">&larr; Insights</a></div>
+    <p class="kicker">Tool</p>
+    <h1>Reconciliation checker</h1>
+    <p class="lede">Compare two files that should agree and list every line that does not: amounts that differ, keys that appear twice, and records present in one file but not the other. Typical uses include an invoice against purchase orders, a payout report against orders, or a bank statement against a ledger export.</p>
+    <div class="meta-row"><span><b>Privacy</b> runs in this browser tab, files are not uploaded</span><span><b>Format</b> CSV (save Excel files as CSV first)</span></div>
+  </div>
+
+  <div class="dash-grid two">
+    <div class="drop" id="drop-a">
+      <h3>File A: the statement to check</h3>
+      <p class="hint">For example an invoice, payout or settlement report. One row per transaction, order or line.</p>
+      <input type="file" id="file-a" accept=".csv,.txt,text/csv">
+      <div class="loaded" id="info-a"></div>
+      <div class="fields" id="fields-a" hidden>
+        <label class="field">Match on<select id="key-a"></select></label>
+        <label class="field">Amount<select id="amt-a"></select></label>
+      </div>
+    </div>
+    <div class="drop" id="drop-b">
+      <h3>File B: your records</h3>
+      <p class="hint">What File A should agree with, such as purchase orders, an order export or a ledger.</p>
+      <input type="file" id="file-b" accept=".csv,.txt,text/csv">
+      <div class="loaded" id="info-b"></div>
+      <div class="fields" id="fields-b" hidden>
+        <label class="field">Match on<select id="key-b"></select></label>
+        <label class="field">Amount<select id="amt-b"></select></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:16px">
+    <div style="display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end">
+      <label class="field">Tolerance per line<input type="number" id="tol" value="1" min="0" step="0.01" style="width:110px"></label>
+      <label class="field">Currency<select id="cur"><option value="&#8377;">&#8377; INR</option><option value="$">$ USD</option><option value="&pound;">&pound; GBP</option><option value="">None</option></select></label>
+      <label style="display:flex;gap:6px;align-items:center;font-size:15px"><input type="checkbox" id="opt-case" checked> Ignore case and spaces in keys</label>
+      <label style="display:flex;gap:6px;align-items:center;font-size:15px"><input type="checkbox" id="opt-dup" checked> Treat a repeated key in File A as a duplicate</label>
+    </div>
+    <div class="cta-row">
+      <button class="btn primary" id="run" type="button" disabled>Run reconciliation</button>
+      <button class="btn" id="sample" type="button">Try with sample files</button>
+      <a class="small" id="dl-samples" href="#" style="align-self:center">Download the sample files</a>
+    </div>
+    <p class="small muted" style="margin:12px 0 0">Where File B has several rows for the same key, such as an order with three items, they are added together before matching.</p>
+  </div>
+
+  <div id="results" hidden>
+    <div class="dash-grid wide-left">
+      <div class="panel">
+        <div class="panel-head"><div><h3>Summary</h3><p id="res-title"></p></div></div>
+        <table class="summary-table" id="summary"></table>
+        <p class="small muted" id="foot-note" style="margin:10px 0 0"></p>
+      </div>
+      <div class="panel" id="p-mix">
+        <div class="panel-head"><div><h3>Amount at issue by type</h3><p>Lines where File A is higher than File B, or has no match</p></div></div>
+        <div class="chart short" id="c-mix"></div>
+        <div id="cta-box" style="border-top:1px solid var(--rule);padding-top:12px;margin-top:6px;font-size:15px"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:24px">
+      <div class="panel-head">
+        <div><h3>Exceptions</h3><p>Every line that did not agree. Select a column to sort.</p></div>
+        <div class="panel-tools"><button class="tbl-btn" id="dl-ex" type="button">Download CSV</button></div>
+      </div>
+      <div class="chips" id="ex-filter"></div>
+      <div id="t-ex" style="max-height:480px;overflow:auto"></div>
+    </div>
+  </div>
+
+  <div class="method">
+    <h3>How it works</h3>
+    <p>Each line in File A is matched to File B on the key you choose. A line agrees if the amounts are within the tolerance. Lines in File A with no match, lines in File B that were never billed, and keys repeated in File A are listed as exceptions. Both file totals are re-added from the line detail as a check on the result.</p>
+    <p>The checker identifies differences. Establishing the cause and supporting evidence for each, across a longer period, is covered in a paid engagement. See <a href="index.html#models">services and fees</a>.</p>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap"><span>&copy; Syed Raza Hasan</span><span><a href="index.html#contact">razahasan8993@gmail.com</a></span></div></footer>
+
+<script src="assets/echarts.min.js?v=5.5.1"></script>
+<script src="assets/viz.js?v=11"></script>
+<script>
+(function () {
+  const { fmt, css } = V;
+  const files = { a: null, b: null };
+
+  // ---------- CSV parsing (quotes, embedded commas/newlines, ; or tab delimiters, BOM) ----------
+  function parseCSV(text) {
+    text = text.replace(/^﻿/, "");
+    const first = text.split(/\r?\n/, 1)[0] || "";
+    const delim = [",", ";", "\t", "|"].map(d => [d, first.split(d).length]).sort((x, y) => y[1] - x[1])[0][0];
+    const rows = []; let row = [], cell = "", q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+        else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === delim) { row.push(cell); cell = ""; }
+      else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+      else cell += c;
+    }
+    if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+    const clean = rows.filter(r => r.some(v => v.trim() !== ""));
+    const header = (clean.shift() || []).map((h, i) => h.trim() || "Column " + (i + 1));
+    return { header, rows: clean };
+  }
+  function parseAmt(s) {
+    if (s == null) return null;
+    let t = String(s).trim();
+    if (!t) return null;
+    let neg = false;
+    if (/^\(.*\)$/.test(t)) { neg = true; t = t.slice(1, -1); }
+    if (/-$/.test(t)) { neg = true; t = t.slice(0, -1); }
+    t = t.replace(/rs\.?|inr|usd|gbp|[₹$£€\s,]/gi, "");
+    const v = parseFloat(t);
+    return isNaN(v) ? null : (neg ? -Math.abs(v) : v);
+  }
+
+  // ---------- column guesses ----------
+  function guess(f) {
+    const score = f.header.map((h, i) => {
+      const vals = f.rows.slice(0, 500).map(r => r[i]);
+      const numeric = vals.filter(v => parseAmt(v) != null).length / (vals.length || 1);
+      const uniq = new Set(vals.map(v => (v || "").trim())).size / (vals.length || 1);
+      return { i, h, numeric, uniq };
+    });
+    const keyRx = /awb|tracking|waybill|order|invoice|inv|ref|sku|txn|transaction|utr|po\b|id\b|number|no\.?$/i;
+    const amtRx = /amount|amt|total|charge|freight|price|value|payable|net|fee|cost/i;
+    const key = score.filter(s => keyRx.test(s.h)).sort((a, b) => b.uniq - a.uniq)[0] || score.slice().sort((a, b) => b.uniq - a.uniq)[0];
+    const amts = score.filter(s => s.numeric > 0.8 && s.i !== key.i);
+    const amt = amts.filter(s => amtRx.test(s.h)).pop() || amts.pop() || score[score.length - 1];
+    return { key: key.i, amt: amt.i };
+  }
+  function fillSelects(side) {
+    const f = files[side], g = guess(f);
+    ["key", "amt"].forEach(k => {
+      const sel = document.getElementById(k + "-" + side); sel.textContent = "";
+      f.header.forEach((h, i) => { const o = document.createElement("option"); o.value = i; o.textContent = h; sel.appendChild(o); });
+      sel.value = g[k];
+    });
+    document.getElementById("fields-" + side).hidden = false;
+    document.getElementById("info-" + side).textContent = f.name + " · " + fmt.int(f.rows.length) + " rows · " + f.header.length + " columns";
+    document.getElementById("run").disabled = !(files.a && files.b);
+  }
+  function load(side, name, text) {
+    const p = parseCSV(text);
+    if (!p.rows.length) { document.getElementById("info-" + side).textContent = "No rows could be read from " + name + "."; return; }
+    files[side] = Object.assign(p, { name });
+    fillSelects(side);
+  }
+  ["a", "b"].forEach(side => {
+    const input = document.getElementById("file-" + side), zone = document.getElementById("drop-" + side);
+    const read = file => { const r = new FileReader(); r.onload = () => load(side, file.name, r.result); r.readAsText(file); };
+    input.addEventListener("change", () => input.files[0] && read(input.files[0]));
+    zone.addEventListener("dragover", e => { e.preventDefault(); zone.classList.add("over"); });
+    zone.addEventListener("dragleave", () => zone.classList.remove("over"));
+    zone.addEventListener("drop", e => { e.preventDefault(); zone.classList.remove("over"); if (e.dataTransfer.files[0]) read(e.dataTransfer.files[0]); });
+  });
+
+  // ---------- sample files (illustrative, deterministic): a courier invoice and a shipping log ----------
+  function samples() {
+    let s = 7; const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+    const RATE = { A: 32, B: 38, C: 45, D: 54 }, Z = Object.keys(RATE);
+    const charge = (w, z) => Math.ceil(w / 0.5) * RATE[z];
+    const log = [["AWB", "Order ID", "Declared weight (kg)", "Zone", "Expected charge"]];
+    const bill = [["AWB No", "Charged weight (kg)", "Zone", "Freight amount"]];
+    for (let i = 0; i < 60; i++) {
+      const awb = "SR26" + String(4100 + i * 3).padStart(5, "0");
+      const w = [0.4, 0.5, 0.8, 1, 1.4, 2][Math.floor(rnd() * 6)], z = Z[Math.floor(rnd() * 4)];
+      const exp = charge(w, z);
+      if (i !== 41) log.push([awb, "ORD-" + (88120 + i), w, z, exp]);
+      let cw = w;
+      if ([3, 11, 19, 27, 52].includes(i)) cw = w + (i % 2 ? 0.5 : 1);   // weight disputes
+      if (i === 33) cw = Math.max(0.5, w - 0.5);                         // undercharged
+      if (i === 47) continue;                                            // not billed yet
+      const amt = charge(cw, z) + (i === 22 ? RATE[z] * 2 : 0);          // return charge on a delivered parcel
+      bill.push([awb, cw, z, amt.toFixed(2)]);
+      if (i === 8 || i === 36) bill.push([awb, cw, z, amt.toFixed(2)]);   // billed twice
+    }
+    bill.push(["SR2699871", 1, "C", "90.00"]);                             // not in the log
+    const csv = rows => rows.map(r => r.map(v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(",")).join("\n");
+    return { bill: csv(bill), log: csv(log) };
+  }
+  document.getElementById("sample").addEventListener("click", () => {
+    const sm = samples();
+    load("a", "sample_invoice.csv", sm.bill); load("b", "sample_records.csv", sm.log);
+    run();
+  });
+  function download(name, text) {
+    const url = URL.createObjectURL(new Blob([text], { type: "text/csv" }));
+    const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  document.getElementById("dl-samples").addEventListener("click", e => { e.preventDefault(); const sm = samples(); download("sample_invoice.csv", sm.bill); download("sample_records.csv", sm.log); });
+
+  // ---------- reconciliation ----------
+  let last = null, filter = "all", mixChart = null;
+  function run() {
+    const ka = +document.getElementById("key-a").value, aa = +document.getElementById("amt-a").value;
+    const kb = +document.getElementById("key-b").value, ab = +document.getElementById("amt-b").value;
+    const tol = Math.max(0, parseFloat(document.getElementById("tol").value) || 0);
+    const ignore = document.getElementById("opt-case").checked, dupMode = document.getElementById("opt-dup").checked;
+    const norm = k => { k = String(k == null ? "" : k).trim(); return ignore ? k.toUpperCase().replace(/\s+/g, "") : k; };
+
+    let blankA = 0, blankB = 0, badA = 0, badB = 0;
+    const recs = new Map(); let recTotal = 0;
+    files.b.rows.forEach(r => {
+      const k = norm(r[kb]); if (!k) { blankB++; return; }
+      const v = parseAmt(r[ab]); if (v == null) { badB++; return; }
+      recTotal += v;
+      const e = recs.get(k); if (e) { e.amt += v; e.n++; } else recs.set(k, { key: String(r[kb]).trim(), amt: v, n: 1 });
+    });
+    const billLines = []; let billTotal = 0;
+    files.a.rows.forEach(r => {
+      const k = norm(r[ka]); if (!k) { blankA++; return; }
+      const v = parseAmt(r[aa]); if (v == null) { badA++; return; }
+      billTotal += v; billLines.push({ k, key: String(r[ka]).trim(), amt: v });
+    });
+    const ex = [], seen = new Map(), S = { ok: [0, 0], var: [0, 0, 0, 0], dup: [0, 0], nob: [0, 0], nor: [0, 0], recOk: 0, recVar: 0 };
+    let lines = billLines;
+    if (!dupMode) { const agg = new Map(); billLines.forEach(l => { const e = agg.get(l.k); if (e) e.amt += l.amt; else agg.set(l.k, Object.assign({}, l)); }); lines = [...agg.values()]; }
+    lines.forEach(l => {
+      if (seen.has(l.k)) { S.dup[0]++; S.dup[1] += l.amt; ex.push({ m: "dup", key: l.key, bill: l.amt, rec: null, diff: l.amt, note: "Duplicate in File A" }); return; }
+      seen.set(l.k, true);
+      const r = recs.get(l.k);
+      if (!r) { S.nob[0]++; S.nob[1] += l.amt; ex.push({ m: "nob", key: l.key, bill: l.amt, rec: null, diff: l.amt, note: "Not in File B" }); return; }
+      const d = l.amt - r.amt;
+      if (Math.abs(d) <= tol) { S.ok[0]++; S.ok[1] += l.amt; S.recOk += r.amt; }
+      else { S.var[0]++; S.var[1] += l.amt; S.recVar += r.amt; if (d > 0) S.var[2] += d; else S.var[3] += d; ex.push({ m: "var", key: l.key, bill: l.amt, rec: r.amt, diff: d, note: d > 0 ? "File A higher" : "File A lower" }); }
+    });
+    recs.forEach((r, k) => { if (!seen.has(k)) { S.nor[0]++; S.nor[1] += r.amt; ex.push({ m: "nor", key: r.key, bill: null, rec: r.amt, diff: -r.amt, note: "Not in File A" }); } });
+    const over = S.var[2] + S.dup[1] + S.nob[1];
+    // both file totals must re-add from the line detail
+    const footA = Math.abs(S.ok[1] + S.var[1] + S.dup[1] + S.nob[1] - billTotal) < 0.005;
+    const footB = Math.abs(S.recOk + S.recVar + S.nor[1] - recTotal) < 0.005;
+    last = { ex, S, over, billTotal, recTotal, footA, footB, blankA, blankB, badA, badB, nA: files.a.rows.length, nB: files.b.rows.length };
+    render();
+  }
+  document.getElementById("run").addEventListener("click", run);
+
+  function money(v) { const c = document.getElementById("cur").value; const t = Math.abs(v).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); return (v < 0 ? "−" : "") + c + t; }
+  const MK = { ok: ["✓", "ok"], var: ["Δ", "var"], dup: ["D", "dup"], nob: ["∅", "nomatch"], nor: ["∅", "nomatch"] };
+  function render() {
+    const L = last, S = L.S;
+    document.getElementById("results").hidden = false;
+    document.getElementById("res-title").textContent = files.a.name + " compared with " + files.b.name;
+    const t = document.getElementById("summary"); t.textContent = "";
+    const head = t.createTHead().insertRow();
+    ["", "Lines", "Amount", ""].forEach(h => { const th = document.createElement("th"); th.textContent = h; head.appendChild(th); });
+    const tb = t.createTBody();
+    const row = (label, n, amt, mk, flag) => {
+      const tr = tb.insertRow(); if (flag) tr.className = "flag";
+      tr.insertCell().textContent = label; tr.insertCell().textContent = n == null ? "" : fmt.int(n); tr.insertCell().textContent = amt == null ? "" : money(amt);
+      const m = tr.insertCell(); m.className = "m"; if (mk) { const s = document.createElement("span"); s.className = "tm " + MK[mk][1]; s.textContent = MK[mk][0]; m.appendChild(s); }
+    };
+    row("Agree", S.ok[0], S.ok[1], "ok");
+    row("Amount differs (net)", S.var[0], S.var[2] + S.var[3], "var", S.var[0] > 0);
+    row("Duplicate in File A", S.dup[0], S.dup[1], "dup", S.dup[0] > 0);
+    row("In File A only", S.nob[0], S.nob[1], "nob", S.nob[0] > 0);
+    row("In File B only", S.nor[0], S.nor[1], "nor", false);
+    const tf = t.createTFoot();
+    const frow = (label, n, amt) => { const tr = tf.insertRow(); tr.insertCell().textContent = label; tr.insertCell().textContent = n == null ? "" : fmt.int(n); tr.insertCell().textContent = money(amt); tr.insertCell(); };
+    frow("File A total", L.nA, L.billTotal);
+    frow("File B total", L.nB, L.recTotal);
+    frow("Amount at issue", null, L.over);
+    const notes = [];
+    notes.push(L.footA && L.footB ? "Both totals agree to the line detail." : "Totals do not re-add from the lines. Check the amount columns.");
+    if (L.blankA || L.blankB) notes.push((L.blankA + L.blankB) + " rows had no key and were skipped.");
+    if (L.badA || L.badB) notes.push((L.badA + L.badB) + " rows had an unreadable amount.");
+    if (S.var[3] < 0) notes.push("File A is lower than File B on some lines, by " + money(S.var[3]) + " in total.");
+    document.getElementById("foot-note").textContent = notes.join(" ");
+
+    if (mixChart) { V.update(mixChart); } else mixChart = V.register(document.getElementById("c-mix"), () => {
+      const S = last.S;
+      const items = [["Amount differs", S.var[2]], ["Duplicate", S.dup[1]], ["In File A only", S.nob[1]]];
+      return Object.assign(V.base(), {
+        grid: { left: 8, right: 80, top: 4, bottom: 4, containLabel: true },
+        xAxis: V.valAxis(v => v, { show: false }),
+        yAxis: V.catAxis(items.map(i => i[0]), { inverse: true, axisLine: { show: false }, axisLabel: { color: css("--ink-2"), fontSize: 12.5 } }),
+        tooltip: Object.assign(V.base().tooltip, { trigger: "item", formatter: p => V.esc(p.name) + "<br><b>" + V.esc(money(p.value)) + "</b>" }),
+        series: [{ type: "bar", data: items.map(i => i[1]), barMaxWidth: 16, itemStyle: { color: css("--s1"), borderRadius: [0, 3, 3, 0] },
+          label: { show: true, position: "right", color: css("--ink-2"), fontSize: 12.5, formatter: p => money(p.value) } }],
+      });
+    });
+    const cta = document.getElementById("cta-box"); cta.textContent = "";
+    const p = document.createElement("p"); p.style.margin = "0 0 10px"; p.style.color = "var(--ink-2)";
+    p.textContent = L.over > 0
+      ? "If you would like these differences investigated over a longer period, with the cause and supporting evidence for each, I can help."
+      : "The two files agree. If the same check is needed every month, it can be set up to run on a schedule.";
+    cta.appendChild(p);
+    const a = document.createElement("a"); a.className = "btn"; a.href = "mailto:razahasan8993@gmail.com?subject=Reconciliation%20review"; a.textContent = "Discuss a review"; cta.appendChild(a);
+    drawFilter(); drawTable();
+    document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function drawFilter() {
+    const el = document.getElementById("ex-filter"); el.textContent = "";
+    const counts = { all: last.ex.length, var: 0, dup: 0, nob: 0, nor: 0 }; last.ex.forEach(e => counts[e.m]++);
+    [["all", "All"], ["var", "Amount differs"], ["dup", "Duplicate"], ["nob", "In File A only"], ["nor", "In File B only"]].forEach(([k, l]) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = l + " (" + counts[k] + ")"; b.setAttribute("aria-pressed", filter === k);
+      b.addEventListener("click", () => { filter = k; drawFilter(); drawTable(); }); el.appendChild(b);
+    });
+  }
+  function drawTable() {
+    const rows = last.ex.filter(e => filter === "all" || e.m === filter);
+    V.table(document.getElementById("t-ex"), [
+      { key: "key", label: "Key", txt: true }, { key: "bill", label: "File A", fmt: v => v == null ? "" : money(v) },
+      { key: "rec", label: "File B", fmt: v => v == null ? "" : money(v) }, { key: "diff", label: "Difference", fmt: v => money(v) },
+      { key: "note", label: "Type", txt: true },
+    ], rows, { sortKey: "diff" });
+  }
+  document.getElementById("dl-ex").addEventListener("click", () => {
+    if (!last) return;
+    const q = v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v;
+    const lines = [["key", "file_a", "file_b", "difference", "type"].join(",")].concat(
+      last.ex.map(e => [e.key, e.bill ?? "", e.rec ?? "", e.diff.toFixed(2), e.note].map(q).join(",")));
+    download("reconciliation_exceptions.csv", lines.join("\n"));
+  });
+  ["key-a", "amt-a", "key-b", "amt-b", "tol", "opt-case", "opt-dup", "cur"].forEach(id => document.getElementById(id).addEventListener("change", () => { if (last) run(); }));
+})();
+</script>
+</body>
+</html>

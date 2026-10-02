@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue Reconciliation | Syed Raza Hasan</title>
+<meta name="description" content="A reconciliation of one million invoice lines: what sits between invoiced value and clean revenue, and what should be done about it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css?v=12">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+</head>
+<body data-source="UCI Machine Learning Repository, Online Retail II. Analysis by Syed Raza Hasan.">
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html">Syed Raza Hasan<small>Finance and operations analytics</small></a>
+    <nav class="nav">
+      <a class="hide-sm" href="../index.html#capabilities">Capabilities</a>
+      <a class="hide-sm" href="../index.html#engagements">Engagements</a>
+      <a href="../index.html#insights">Insights</a>
+      <a href="../index.html#contact">Contact</a>
+      <button class="theme-btn" type="button" aria-label="Toggle theme"></button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="dash-head">
+    <div class="crumbs"><a href="../index.html#insights">&larr; Insights</a></div>
+    <p class="kicker">Insight &middot; Financial controls</p>
+    <h1>&pound;1.85M of invoiced value never reached clean revenue</h1>
+    <p class="lede">A reconciliation of a UK online wholesaler's billing export: 1.04M invoice lines from December 2009 to November 2011. The question was whether the revenue figure could be relied on before any reporting was built on it.</p>
+    <div class="meta-row"><span><b>Source</b> UCI Online Retail II (public)</span><span><b>Coverage</b> 1,041,845 invoice lines</span><span><b>Method</b> Python, pandas</span></div>
+  </div>
+
+  <div class="findings">
+    <h2>Key findings</h2>
+    <ol>
+      <li><b>&pound;20.33M was invoiced and &pound;18.49M is clean product revenue.</b> The reconciliation accounts for every pound of the &pound;1.85M difference.</li>
+      <li><b>34,056 duplicate lines account for &pound;495K, 27% of the gap.</b> Postage, fees and normal cancellations explain the remaining 73%.</li>
+      <li><b>628 credit lines refund items the customer had not previously bought</b>, and 13,416 lines were sold at under half the product's usual price.</li>
+      <li><b>&pound;192K of Amazon fees sit in the billing file across 34 lines</b>, alongside 1,443 manual adjustments and six bad-debt write-offs totalling &pound;148K. Each needs supporting documentation.</li>
+    </ol>
+  </div>
+
+  <div class="brief">
+    <div class="brief-who">
+      <h3>Context</h3>
+      <dl>
+        <dt>Who uses it</dt><dd>The owner or finance lead, before trusting the revenue figure or closing the year</dd>
+        <dt>How often</dt><dd>Once as a look-back over all history, then the same checks every month</dd>
+        <dt>Key question</dt><dd>Is revenue clean, and where is money leaking out of billing?</dd>
+        <dt>Decision it supports</dt><dd>Which billing steps to fix, which credits to reverse, and which customers to re-bill or refund</dd>
+        <dt>Existing report?</dt><dd>Sales reports show totals. None of them flag duplicates, credits with no sale behind them, or under-priced lines.</dd>
+      </dl>
+    </div>
+    <ol class="chain">
+      <li><span>Metric</span><p>The gap between gross invoiced lines and clean product revenue, split by cause.</p></li>
+      <li><span>Problem</span><p>&pound;20.33M was invoiced. Clean product revenue is &pound;18.49M. Nobody had explained the &pound;1.85M in between.</p></li>
+      <li><span>Hypothesis</span><p>Most of the gap is routine postage and returns, and real leakage is a small slice of it.<br><span class="verdict part">Result: partly supported</span></p></li>
+      <li><span>Analysis</span><p>Five rules run over every line. <b>Postage, fees and returns explain 73% of the gap. Duplicate lines alone are &pound;495K, the other 27%</b>, and duplicates are never routine.</p></li>
+      <li><span>Experiment</span><p>Check 50 of the under-priced lines against agreed price lists. If most are agreed discounts, drop the rule. If not, add a price-floor check at invoicing.</p></li>
+      <li><span>Decision</span><p><b>Fix whatever writes duplicate lines first</b>, then require a source invoice or approval for every credit note.</p></li>
+    </ol>
+  </div>
+
+  <div class="dash-grid wide-left">
+    <div class="panel" id="p-wf">
+      <div class="panel-head">
+        <div><h3>From invoiced to clean revenue</h3><p>GBP. Grey bars are totals, red bars are what each step removes. The axis starts at &pound;16M so the steps are visible.</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-wf" aria-pressed="false">Table</button></div>
+      </div>
+      <div class="chart" id="c-wf"></div>
+      <div class="table-view" id="t-wf"></div>
+      <p class="small muted" style="margin:8px 0 0">Clean revenue agrees to net sales in the customer analysis within &pound;1 of rounding.</p>
+    </div>
+    <div class="panel" id="p-fees">
+      <div class="panel-head">
+        <div><h3>Postage, fees and adjustments</h3><p>Non-product lines, net GBP. Blue adds to the bill, red takes away.</p></div>
+        <div class="panel-tools"><button class="tbl-btn" data-panel="p-fees" aria-pressed="false">Table</button></div>
+      </div>
+      <div class="chart" id="c-fees"></div>
+      <div class="table-view" id="t-fees"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-head"><div><h3>Exception register</h3><p>Each item is a flag for review. In a client engagement it is checked against source documents before any correction or claim is made.</p></div></div>
+    <div style="overflow:auto"><table class="data" id="t-find"></table></div>
+  </div>
+
+
+  <div class="method">
+    <h3>Methodology</h3>
+    <p><b>Duplicates</b> are lines identical in every column: invoice, product, quantity, timestamp, price and customer. <b>Credits with no matching sale</b> are cancellation lines where that customer never bought that product earlier in the file, counted from March 2010 so the first months aren't penalised for sales before the file starts. <b>Under-priced lines</b> are sold below half the product's median price for the same order-size band, only where that product and band has at least 20 sales. <b>Zero-price lines</b> have a quantity but a price of &pound;0. <b>Untraceable sales</b> have no customer ID.</p>
+    <p>The waterfall uses positive invoice lines as gross, removes exact duplicates, then non-product lines (postage, fees, adjustments, gift vouchers), then product cancellations. What remains is clean product revenue, the same figure the customer analysis starts from.</p>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap"><span>&copy; Syed Raza Hasan</span><span><a href="../index.html#contact">razahasan8993@gmail.com</a></span></div></footer>
+
+<script src="../assets/echarts.min.js?v=5.5.1"></script>
+<script src="../assets/viz.js?v=11"></script>
+<script src="../data/audit.js?v=5"></script>
+<script>
+(function () {
+  const A = window.AUDIT, { fmt, css } = V;
+  const W = A.waterfall;
+
+  // waterfall: totals in neutral, each removal floats from the running balance
+  V.register("c-wf", () => {
+    const names = W.map(r => r[0]), base = [], val = [];
+    let run = W[0][1];
+    W.forEach((r, i) => {
+      if (i === 0) { base.push(0); val.push({ value: r[1], itemStyle: { color: css("--axis") } }); }
+      else if (i === W.length - 1) { base.push(0); val.push({ value: r[1], itemStyle: { color: css("--axis") } }); }
+      else { run += r[1]; base.push(run); val.push({ value: -r[1], itemStyle: { color: css("--var") } }); }
+    });
+    return Object.assign(V.base(), {
+      grid: { left: 8, right: 16, top: 28, bottom: 8, containLabel: true },
+      xAxis: V.catAxis(names, { axisLabel: { color: css("--ink-2"), fontSize: 11.5, interval: 0, width: 90, overflow: "break" } }),
+      yAxis: V.valAxis(v => fmt.gbp(v), { min: 16e6 }),
+      tooltip: Object.assign(V.base().tooltip, { trigger: "item", formatter: p => {
+        const r = W[p.dataIndex]; return '<div style="color:' + css("--ink-2") + ';font-size:12px">' + V.esc(r[0]) + "</div><b>" + (r[1] < 0 ? "&minus;" : "") + "&pound;" + fmt.int(Math.abs(r[1])) + "</b>"; } }),
+      series: [
+        { type: "bar", stack: "w", data: base, itemStyle: { color: "transparent" }, emphasis: { disabled: true }, tooltip: { show: false }, silent: true },
+        { type: "bar", stack: "w", data: val, barMaxWidth: 56, itemStyle: { borderRadius: [3, 3, 0, 0] },
+          label: { show: true, position: "top", color: css("--ink"), fontSize: 12, fontFamily: css("--mono"), formatter: p => { const r = W[p.dataIndex][1]; return (r < 0 ? "−" : "") + fmt.gbp(Math.abs(r)); } } },
+      ],
+    });
+  });
+  V.table(document.getElementById("t-wf"), [{ key: "s", label: "Step", txt: true }, { key: "v", label: "GBP", fmt: v => (v < 0 ? "−" : "") + fmt.int(Math.abs(v)) }],
+    W.map((r, i) => ({ i, s: r[0], v: r[1] })), { sortKey: "i", dir: 1 });
+
+  // fees: diverging by sign (blue adds, red removes), sorted by size
+  const F = A.fees.filter(f => Math.abs(f.value) >= 1000).sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+  V.register("c-fees", () => Object.assign(V.base(), {
+    grid: { left: 8, right: 64, top: 4, bottom: 4, containLabel: true },
+    xAxis: V.valAxis(v => fmt.gbp(v), { show: false }),
+    yAxis: V.catAxis(F.map(f => f.type), { inverse: true, axisLine: { show: false }, axisLabel: { color: css("--ink-2"), fontSize: 12 } }),
+    tooltip: Object.assign(V.base().tooltip, { trigger: "item", formatter: p => { const f = F[p.dataIndex]; return '<div style="color:' + css("--ink-2") + ';font-size:12px">' + V.esc(f.type) + " &middot; " + fmt.int(f.lines) + " lines</div><b>" + (f.value < 0 ? "&minus;" : "+") + "&pound;" + fmt.int(Math.abs(f.value)) + "</b>"; } }),
+    series: [{ type: "bar", data: F.map(f => ({ value: Math.abs(f.value), itemStyle: { color: f.value < 0 ? css("--div-neg") : css("--div-pos"), borderRadius: [0, 3, 3, 0] } })), barMaxWidth: 14,
+      label: { show: true, position: "right", color: css("--ink-2"), fontSize: 11.5, fontFamily: css("--mono"), formatter: p => (F[p.dataIndex].value < 0 ? "−" : "+") + fmt.gbp(p.value) } }],
+  }));
+  V.table(document.getElementById("t-fees"), [{ key: "type", label: "Type", txt: true }, { key: "lines", label: "Lines", fmt: fmt.int }, { key: "value", label: "Net GBP", fmt: v => (v < 0 ? "−" : "+") + fmt.int(Math.abs(v)) }], A.fees, { sortKey: "value", dir: 1 });
+
+  // findings register
+  const MARK = { dup: ["D", "dup"], nomatch: ["∅", "nomatch"], var: ["Δ", "var"] };
+  const NEXT = {
+    F1: "Identify the system or export step that creates the repeats, then test a sample against customer statements for double billing.",
+    F2: "Obtain the original invoice or a documented approval for each credit. Reverse credits that have neither.",
+    F3: "Test a sample of 50 against agreed price lists. If errors are confirmed, add a price-floor check at invoicing.",
+    F4: "Match each line to a sample or replacement log, and investigate any line without one.",
+    F5: "Make customer ID mandatory at order entry so every sale traces to an account.",
+  };
+  const t = document.getElementById("t-find");
+  const head = t.createTHead().insertRow();
+  ["", "Ref", "Exception", "Lines", "Value", "Recommended action"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i === 2 || i === 5) th.className = "txt"; th.style.cursor = "default"; head.appendChild(th); });
+  const tb = t.createTBody();
+  A.findings.forEach(f => {
+    const tr = tb.insertRow();
+    const m = tr.insertCell(); const s = document.createElement("span"); s.className = "tm " + MARK[f.mark][1]; s.textContent = MARK[f.mark][0]; m.appendChild(s);
+    tr.insertCell().textContent = f.id;
+    const c = tr.insertCell(); c.className = "txt"; c.style.minWidth = "280px";
+    const b = document.createElement("b"); b.textContent = f.title; c.appendChild(b);
+    const d = document.createElement("div"); d.className = "small"; d.style.color = "var(--ink-2)"; d.style.marginTop = "3px"; d.textContent = f.detail; c.appendChild(d);
+    tr.insertCell().textContent = fmt.int(f.count);
+    tr.insertCell().textContent = f.unit === "units" ? fmt.int(f.value) + " units" : "£" + fmt.int(f.value);
+    const n = tr.insertCell(); n.className = "txt"; n.style.minWidth = "240px"; n.style.color = "var(--ink-2)"; n.textContent = NEXT[f.id];
+  });
+})();
+</script>
+</body>
+</html>

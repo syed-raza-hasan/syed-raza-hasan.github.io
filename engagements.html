@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engagements | Syed Raza Hasan</title>
+<meta name="description" content="Selected engagements in financial controls, automation, decision analysis and regulatory reporting from ten years in US fintech and banking.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=12">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html">Syed Raza Hasan<small>Finance and operations analytics</small></a>
+    <nav class="nav">
+      <a class="hide-sm" href="index.html#capabilities">Capabilities</a>
+      <a class="hide-sm" href="index.html#engagements" aria-current="page">Engagements</a>
+      <a href="index.html#insights">Insights</a>
+      <a href="index.html#contact">Contact</a>
+      <button class="theme-btn" type="button" aria-label="Toggle theme"></button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="dash-head">
+    <div class="crumbs"><a href="index.html#engagements">&larr; Home</a></div>
+    <p class="kicker">Engagements</p>
+    <h1>Selected engagements</h1>
+    <p class="lede">Work from my current role as the operations analyst for a US digital lender, and earlier roles at Accenture and Genpact. Results are shown as percentages or time saved. Employer financial data is not disclosed.</p>
+  </div>
+
+  <article class="engagement">
+    <div>
+      <h3>Automating a monthly loan-level fee reconciliation</h3>
+      <p class="tagline">Financial controls &middot; SQL</p>
+      <p class="impact">0.4%<span>net variance remaining, with an audit trail on every record</span></p>
+    </div>
+    <div class="cap-grid">
+      <div><h4>Challenge</h4><p>Borrowers pay for appraisals through deposits and fees, while vendors are paid separately. Finance needed to confirm each month, for every loan, that the two agreed.</p></div>
+      <div><h4>Approach</h4><p>Built the reconciliation in SQL, matching appraisal costs to borrower deposits and fees loan by loan, with each record traceable to its source data.</p></div>
+      <div><h4>Impact</h4><p>Net variance reduced to 0.4% of the total, with every remaining item traceable. The reconciliation now runs monthly without manual work.</p></div>
+    </div>
+  </article>
+
+  <article class="engagement">
+    <div>
+      <h3>Controls over vendor invoices before payment</h3>
+      <p class="tagline">Financial controls &middot; SQL, data quality</p>
+      <p class="impact">Every invoice<span>checked against contract terms and source data each month</span></p>
+    </div>
+    <div class="cap-grid">
+      <div><h4>Challenge</h4><p>Vendor invoices for loan-level services arrive monthly. Paying them unchecked risks incorrect rates, misallocated charges and duplicate payment.</p></div>
+      <div><h4>Approach</h4><p>Designed the data-quality checks that sit in front of vendor payments, matching each invoice to contract terms and to source-system records.</p></div>
+      <div><h4>Impact</h4><p>Mismatches are routed to Finance and Procurement before payment. The checks have run every month since they were introduced.</p></div>
+    </div>
+  </article>
+
+  <article class="engagement">
+    <div>
+      <h3>Replacing manual invoice allocation with a pipeline</h3>
+      <p class="tagline">Process automation &middot; Python, PostgreSQL</p>
+      <p class="impact">80 hours<span>of manual work removed each month</span></p>
+    </div>
+    <div class="cap-grid">
+      <div><h4>Challenge</h4><p>Around 25 vendor invoice files a month were allocated to individual loans by hand.</p></div>
+      <div><h4>Approach</h4><p>Built a Python pipeline that reads each file and allocates every charge to its loan using the source loan data in PostgreSQL.</p></div>
+      <div><h4>Impact</h4><p>Up to 80 hours a month returned to the team, and a repeatable process in place of spreadsheets.</p></div>
+    </div>
+  </article>
+
+  <article class="engagement">
+    <div>
+      <h3>Measuring marketing cost per funded loan for the CFO</h3>
+      <p class="tagline">Decision analysis &middot; Marketing</p>
+      <p class="impact">~1,400<span>channels traced from lead to funded loan</span></p>
+    </div>
+    <div class="cap-grid">
+      <div><h4>Challenge</h4><p>Leadership needed to know which marketing spend was producing funded loans across HELOC, refinance and purchase products.</p></div>
+      <div><h4>Approach</h4><p>Built the lead-to-funded-loan funnel by channel, identified diminishing returns in the largest channel at peak spend, and used a rate-controlled correlation to test whether organic volume was hidden paid lift.</p></div>
+      <div><h4>Impact</h4><p>A budget reallocation recommendation to the CFO, with monthly cost guardrails and geo holdout tests before any channel receives credit.</p></div>
+    </div>
+  </article>
+
+  <article class="engagement">
+    <div>
+      <h3>Rebuilding a regulated investor report</h3>
+      <p class="tagline">Regulatory reporting &middot; Athena, SharePoint</p>
+      <p class="impact">100%<span>agreement with the investor's sample</span></p>
+    </div>
+    <div class="cap-grid">
+      <div><h4>Challenge</h4><p>A monthly report to a government-sponsored investor depended on manual steps and on a data warehouse the team was retiring.</p></div>
+      <div><h4>Approach</h4><p>Rebuilt the report as a single Athena query and verified it against the investor's sample file.</p></div>
+      <div><h4>Impact</h4><p>Full agreement with the investor's sample, no manual steps, and monthly delivery through SharePoint.</p></div>
+    </div>
+  </article>
+
+  <article class="engagement">
+    <div>
+      <h3>Reducing turnaround across 10,000+ active orders</h3>
+      <p class="tagline">Operations reporting &middot; Jira Service Desk</p>
+      <p class="impact">18%<span>reduction in average turnaround</span></p>
+    </div>
+    <div class="cap-grid">
+      <div><h4>Challenge</h4><p>More than 10,000 active appraisal orders ran through a single service queue for three business units.</p></div>
+      <div><h4>Approach</h4><p>Redesigned prioritisation and SLA routing, added at-risk flags, and built live dashboards for each business unit.</p></div>
+      <div><h4>Impact</h4><p>Average turnaround fell by 1.5 days, about 18%.</p></div>
+    </div>
+  </article>
+
+  <article class="engagement">
+    <div>
+      <h3>A single risk view for fraud and compliance teams</h3>
+      <p class="tagline">Risk analytics &middot; Power BI &middot; Accenture</p>
+      <p class="impact">15%<span>fewer high-risk transactions after rollout</span></p>
+    </div>
+    <div class="cap-grid">
+      <div><h4>Challenge</h4><p>Fraud and compliance teams at banking clients assembled transaction volumes, risk scores and behavioural indicators by hand.</p></div>
+      <div><h4>Approach</h4><p>Built a single Power BI view of the three, and traced data-quality problems in the underlying transaction feeds back to source.</p></div>
+      <div><h4>Impact</h4><p>High-risk transactions fell 15% after rollout.</p></div>
+    </div>
+  </article>
+
+  <div style="margin:36px 0 12px">
+    <h2 style="margin-bottom:10px">Discuss a similar engagement</h2>
+    <p class="lede" style="font-size:17px;margin-top:0">A short description of the question and a sample of the data is enough to begin.</p>
+    <div class="cta-row"><a class="btn primary" href="mailto:razahasan8993@gmail.com?subject=Project%20enquiry">razahasan8993@gmail.com</a></div>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap"><span>&copy; Syed Raza Hasan</span><span><a href="index.html#insights">Insights</a></span></div></footer>
+<script src="assets/viz.js?v=11"></script>
+</body>
+</html>
